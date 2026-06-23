@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>民宿预约管理系统 · 可交互原型</title>
+  <style>
+    :root{
+      --bg:#f6f7fb;
+      --panel:#ffffff;
+      --panel-2:#f9fafb;
+      --text:#1f2937;
+      --muted:#667085;
+      --line:#e5e7eb;
+      --brand:#ff6b35;
+      --brand-2:#ff8f62;
+      --brand-soft:#fff1eb;
+      --blue:#2563eb;
+      --green:#16a34a;
+      --red:#dc2626;
+      --amber:#d97706;
+      --purple:#7c3aed;
+      --shadow:0 18px 45px rgba(31,41,55,.10);
+      --radius:18px;
+      --radius-sm:12px;
+      --sidebar:250px;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"PingFang SC","Microsoft YaHei",sans-serif;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--text);min-height:100vh}
+    button,input,select,textarea{font:inherit}
+    button{cursor:pointer}
+    a{color:inherit;text-decoration:none}
+    .app-shell{min-height:100vh;padding-bottom:84px}
+    .topbar{height:72px;background:rgba(255,255,255,.86);backdrop-filter:blur(16px);border-bottom:1px solid rgba(229,231,235,.85);position:sticky;top:0;z-index:30;display:flex;align-items:center;justify-content:space-between;padding:0 28px}
+    .brand{display:flex;align-items:center;gap:12px;font-weight:900;font-size:19px;letter-spacing:.2px}
+    .brand-mark{width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg,var(--brand),#ffbd7a);display:grid;place-items:center;color:#fff;box-shadow:0 12px 24px rgba(255,107,53,.30)}
+    .top-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+    .switch{display:flex;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:999px;padding:4px;gap:4px}
+    .switch button{border:0;background:transparent;border-radius:999px;padding:8px 14px;color:#64748b;font-weight:700}
+    .switch button.active{background:#fff;color:var(--brand);box-shadow:0 8px 18px rgba(15,23,42,.10)}
+    .nav{display:flex;gap:6px;align-items:center}
+    .nav button{border:0;background:transparent;border-radius:999px;padding:10px 14px;color:#475569;font-weight:700}
+    .nav button.active,.nav button:hover{background:var(--brand-soft);color:var(--brand)}
+    .container{max-width:1180px;margin:0 auto;padding:28px 22px}
+    .admin-layout{display:grid;grid-template-columns:var(--sidebar) minmax(0,1fr);gap:24px;max-width:1420px;margin:0 auto;padding:24px 22px}
+    .sidebar{background:var(--panel);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);padding:16px;position:sticky;top:92px;height:calc(100vh - 116px);overflow:auto}
+    .side-title{font-size:13px;color:#94a3b8;font-weight:800;padding:8px 12px;text-transform:uppercase;letter-spacing:.08em}
+    .side-btn{width:100%;border:0;background:transparent;border-radius:14px;padding:13px 14px;display:flex;align-items:center;gap:11px;color:#475569;font-weight:800;margin:4px 0;text-align:left}
+    .side-btn.active,.side-btn:hover{background:#fff3ed;color:var(--brand)}
+    .main{min-width:0}
+    .hero{border-radius:32px;background:linear-gradient(135deg,rgba(255,107,53,.98),rgba(255,153,102,.86)), radial-gradient(circle at 75% 15%,rgba(255,255,255,.38),transparent 32%);padding:48px;color:#fff;box-shadow:0 28px 60px rgba(255,107,53,.28);position:relative;overflow:hidden}
+    .hero:after{content:"";position:absolute;right:-80px;bottom:-120px;width:340px;height:340px;border-radius:50%;background:rgba(255,255,255,.15)}
+    .hero h1{font-size:42px;line-height:1.1;margin:0 0 12px;font-weight:950;max-width:740px}
+    .hero p{font-size:18px;margin:0 0 28px;opacity:.92;max-width:680px}
+    .search-card{position:relative;z-index:2;background:rgba(255,255,255,.96);color:var(--text);border-radius:24px;padding:18px;box-shadow:0 24px 50px rgba(30,41,59,.18)}
+    .grid{display:grid;gap:16px}
+    .grid.cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .grid.cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .grid.cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+    .field{display:flex;flex-direction:column;gap:7px}
+    .field label{font-size:13px;color:#64748b;font-weight:800}
+    input,select,textarea{border:1px solid #d7dce5;border-radius:13px;background:#fff;padding:12px 13px;outline:none;color:var(--text);transition:.18s border,.18s box-shadow}
+    textarea{min-height:96px;resize:vertical}
+    input:focus,select:focus,textarea:focus{border-color:var(--brand);box-shadow:0 0 0 4px rgba(255,107,53,.12)}
+    .btn{border:0;border-radius:13px;padding:12px 16px;font-weight:900;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:.18s transform,.18s box-shadow,.18s background;white-space:nowrap}
+    .btn:hover{transform:translateY(-1px)}
+    .btn.primary{background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;box-shadow:0 14px 26px rgba(255,107,53,.24)}
+    .btn.dark{background:#111827;color:#fff}
+    .btn.ghost{background:#fff;border:1px solid var(--line);color:#334155}
+    .btn.soft{background:#fff1eb;color:var(--brand)}
+    .btn.blue{background:#eff6ff;color:#2563eb}
+    .btn.green{background:#ecfdf5;color:#15803d}
+    .btn.red{background:#fef2f2;color:#dc2626}
+    .btn.amber{background:#fffbeb;color:#d97706}
+    .btn.purple{background:#f5f3ff;color:#7c3aed}
+    .btn.disabled{background:#f1f5f9;color:#94a3b8;box-shadow:none}
+    .btn.small{padding:8px 11px;border-radius:10px;font-size:13px}
+    .btn.full{width:100%}
+    .section{margin-top:28px}
+    .section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:14px}
+    .section-head h2,.page-title h1{margin:0;font-size:25px;font-weight:950}
+    .section-head p,.page-title p{margin:5px 0 0;color:var(--muted)}
+    .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+    .card.pad{padding:20px}
+    .mini-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:0 12px 28px rgba(15,23,42,.06)}
+    .house-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+    .house-card{overflow:hidden;transition:.18s transform,.18s box-shadow;cursor:pointer;position:relative}
+    .house-card:hover{transform:translateY(-3px);box-shadow:0 26px 60px rgba(15,23,42,.13)}
+    .cover{height:180px;background:linear-gradient(135deg,#fed7aa,#fb7185);position:relative;display:flex;align-items:flex-end;padding:14px;color:#fff;isolation:isolate}
+    .cover:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent,rgba(0,0,0,.46));z-index:-1}
+    .cover .emoji{font-size:42px;position:absolute;top:16px;right:16px;filter:drop-shadow(0 8px 12px rgba(0,0,0,.25))}
+    .cover.c2{background:linear-gradient(135deg,#93c5fd,#c084fc)}
+    .cover.c3{background:linear-gradient(135deg,#86efac,#38bdf8)}
+    .cover.c4{background:linear-gradient(135deg,#fde68a,#fb7185)}
+    .cover.c5{background:linear-gradient(135deg,#a7f3d0,#f0abfc)}
+    .cover.c6{background:linear-gradient(135deg,#fecdd3,#818cf8)}
+    .house-body{padding:16px}
+    .house-title{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:8px}
+    .house-title h3{font-size:17px;margin:0;font-weight:950;line-height:1.3}
+    .price{font-weight:950;color:var(--brand);font-size:19px}
+    .muted{color:var(--muted)}
+    .tags{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    .tag{border-radius:999px;padding:6px 10px;background:#f1f5f9;color:#475569;font-size:12px;font-weight:800;display:inline-flex;align-items:center;gap:4px}
+    .tag.brand{background:var(--brand-soft);color:var(--brand)}
+    .tag.green{background:#ecfdf5;color:#16a34a}.tag.red{background:#fef2f2;color:#dc2626}.tag.amber{background:#fffbeb;color:#d97706}.tag.blue{background:#eff6ff;color:#2563eb}.tag.purple{background:#f5f3ff;color:#7c3aed}.tag.gray{background:#f8fafc;color:#64748b}
+    .row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.between{display:flex;align-items:center;justify-content:space-between;gap:14px}.right{justify-content:flex-end}.center{align-items:center}.mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}.mt20{margin-top:20px}.mb0{margin-bottom:0}.w100{width:100%}
+    .filter-panel{background:#fff;border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);padding:18px;margin-bottom:18px}
+    .list-layout{display:grid;grid-template-columns:300px minmax(0,1fr);gap:20px}
+    .filter-side{position:sticky;top:92px;align-self:start}
+    .list-stack{display:grid;gap:14px}
+    .list-card{display:grid;grid-template-columns:230px 1fr;gap:0;overflow:hidden}
+    .list-card .cover{height:100%;min-height:190px}
+    .status-pill{border-radius:999px;padding:7px 11px;font-size:12px;font-weight:900;display:inline-flex;align-items:center;gap:6px}
+    .status-待确认{background:#fff7ed;color:#ea580c}.status-待支付{background:#eff6ff;color:#2563eb}.status-已预订{background:#ecfdf5;color:#15803d}.status-入住中{background:#f0f9ff;color:#0284c7}.status-已完成{background:#f8fafc;color:#475569}.status-已评价{background:#f5f3ff;color:#7c3aed}.status-已取消{background:#fef2f2;color:#dc2626}.status-退款中{background:#fffbeb;color:#d97706}.status-已退款{background:#f1f5f9;color:#64748b}
+    .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:18px;background:#fff}
+    table{width:100%;border-collapse:collapse;min-width:760px}
+    th,td{padding:13px 14px;border-bottom:1px solid #edf0f4;text-align:left;vertical-align:middle;font-size:14px}
+    th{font-size:12px;color:#64748b;background:#f8fafc;font-weight:900;white-space:nowrap}
+    tr:last-child td{border-bottom:0}
+    .page-title{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:18px}
+    .stat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+    .stat{background:#fff;border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:var(--shadow);cursor:pointer;transition:.18s transform}
+    .stat:hover{transform:translateY(-2px)}
+    .stat .num{font-size:28px;font-weight:950;margin-top:8px}.stat .label{color:#64748b;font-weight:800;font-size:13px}.stat .sub{color:#94a3b8;font-size:12px;margin-top:6px}
+    .chart{height:220px;background:#fff;border:1px solid var(--line);border-radius:22px;padding:18px;box-shadow:var(--shadow);display:flex;align-items:flex-end;gap:13px}
+    .bar{flex:1;background:linear-gradient(180deg,var(--brand-2),var(--brand));border-radius:12px 12px 4px 4px;min-height:22px;position:relative;cursor:pointer}.bar span{position:absolute;bottom:-26px;left:50%;transform:translateX(-50%);font-size:12px;color:#64748b}.bar b{position:absolute;top:-24px;left:50%;transform:translateX(-50%);font-size:12px;color:#334155}
+    .timeline{display:grid;gap:10px}.timeline-item{display:grid;grid-template-columns:38px 1fr;gap:10px}.dot{width:34px;height:34px;border-radius:12px;background:#fff1eb;color:var(--brand);display:grid;place-items:center;font-weight:900}.timeline-body{border-left:2px solid #f1f5f9;padding-left:12px;padding-bottom:12px}
+    .detail-hero{display:grid;grid-template-columns:1.2fr .8fr;gap:22px}.gallery{display:grid;grid-template-columns:1fr 120px;gap:12px}.gallery-main{height:420px;border-radius:26px}.thumbs{display:grid;gap:12px}.thumb{height:96px;border-radius:18px;background:#e2e8f0;cursor:pointer;display:grid;place-items:center;font-size:24px;color:#fff}
+    .sticky-book{position:sticky;top:92px;align-self:start}
+    .fee-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px dashed #e5e7eb}.fee-row:last-child{border-bottom:0}.fee-total{font-size:24px;font-weight:950;color:var(--brand)}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap}.tab{border:0;border-radius:999px;padding:10px 14px;background:#fff;border:1px solid var(--line);color:#475569;font-weight:900}.tab.active{background:var(--brand);border-color:var(--brand);color:#fff}.tab:hover{border-color:var(--brand);color:var(--brand)}.tab.active:hover{color:#fff}
+    .order-card{display:grid;grid-template-columns:1fr auto;gap:18px;padding:18px;background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:0 12px 30px rgba(15,23,42,.06)}
+    .empty{background:#fff;border:1px dashed #cbd5e1;border-radius:22px;padding:36px;text-align:center;color:#64748b}.empty .big{font-size:44px;margin-bottom:10px}
+    .profile-head{display:grid;grid-template-columns:auto 1fr auto;gap:18px;align-items:center}.avatar{width:72px;height:72px;border-radius:26px;background:linear-gradient(135deg,#fb7185,#f97316);display:grid;place-items:center;color:#fff;font-size:30px;font-weight:950}
+    .bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;height:68px;background:rgba(255,255,255,.92);backdrop-filter:blur(16px);border-top:1px solid var(--line);z-index:35;padding:8px 8px calc(8px + env(safe-area-inset-bottom))}.bottom-nav button{flex:1;border:0;background:transparent;border-radius:14px;color:#64748b;font-weight:900;font-size:12px}.bottom-nav button.active{background:#fff1eb;color:var(--brand)}
+    .modal-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.48);display:none;align-items:center;justify-content:center;z-index:100;padding:20px}.modal-backdrop.show{display:flex}.modal{background:#fff;border-radius:24px;box-shadow:0 30px 80px rgba(15,23,42,.35);width:min(760px,100%);max-height:86vh;overflow:hidden;display:flex;flex-direction:column}.modal.sm{width:min(460px,100%)}.modal-head{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.modal-head h3{margin:0;font-size:20px;font-weight:950}.modal-body{padding:20px;overflow:auto}.modal-foot{padding:16px 20px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap}
+    .toast-wrap{position:fixed;top:88px;right:24px;display:grid;gap:10px;z-index:110}.toast{background:#111827;color:#fff;border-radius:14px;padding:12px 14px;box-shadow:0 20px 45px rgba(15,23,42,.28);font-weight:800;animation:toastIn .18s ease-out}.toast.ok{background:#14532d}.toast.warn{background:#92400e}.toast.err{background:#7f1d1d}@keyframes toastIn{from{transform:translateY(-8px);opacity:0}to{transform:translateY(0);opacity:1}}
+    .calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px}.weekday{font-size:12px;color:#64748b;font-weight:900;text-align:center;padding:7px}.day-cell{min-height:92px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:10px;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;transition:.18s transform,.18s border}.day-cell:hover{transform:translateY(-2px);border-color:var(--brand)}.day-cell.locked{background:#fff7ed;border-color:#fed7aa}.day-cell.booked{background:#fef2f2;border-color:#fecaca;cursor:not-allowed}.day-cell.blank{background:transparent;border:0;cursor:default}.day-cell.blank:hover{transform:none}.day-num{font-weight:950}.day-status{font-size:12px;font-weight:900}
+    .stars{display:flex;gap:4px}.star{border:0;background:transparent;font-size:26px;color:#cbd5e1;padding:0 2px;line-height:1}.star.on{color:#f59e0b}.file-drop{border:1px dashed #cbd5e1;border-radius:18px;padding:18px;text-align:center;background:#f8fafc;cursor:pointer}.file-drop:hover{border-color:var(--brand);background:#fff7ed}.kv{display:grid;grid-template-columns:120px 1fr;gap:10px;padding:9px 0;border-bottom:1px dashed #e5e7eb}.kv:last-child{border-bottom:0}.kv b{color:#334155}.pagination{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:14px;color:#64748b}.pill-link{border:0;background:#fff;border:1px solid var(--line);border-radius:999px;padding:7px 11px;color:#475569;font-weight:900}.pill-link:hover{border-color:var(--brand);color:var(--brand)}
+    .check-list{display:flex;gap:8px;flex-wrap:wrap}.check-tag{display:inline-flex;gap:6px;align-items:center;border:1px solid var(--line);border-radius:999px;padding:8px 10px;background:#fff}.check-tag input{width:auto}.login-wrap{min-height:calc(100vh - 126px);display:grid;place-items:center}.login-card{width:min(460px,100%);background:#fff;border:1px solid var(--line);border-radius:28px;padding:28px;box-shadow:var(--shadow)}.hint{background:#f8fafc;border:1px solid var(--line);border-radius:16px;padding:12px;color:#64748b;font-size:13px}.prototype-note{background:#fff8f3;border:1px solid #fed7aa;color:#9a3412;border-radius:18px;padding:14px;margin-bottom:18px;font-weight:700}
+    @media(max-width:1080px){.nav{display:none}.house-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.detail-hero{grid-template-columns:1fr}.sticky-book{position:static}.list-layout{grid-template-columns:1fr}.filter-side{position:static}.admin-layout{grid-template-columns:1fr}.sidebar{position:static;height:auto}.side-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.side-title{display:none}.side-btn{justify-content:center}.topbar{padding:0 18px}.hero h1{font-size:34px}}
+    @media(max-width:720px){.app-shell{padding-bottom:78px}.topbar{height:auto;min-height:64px;padding:10px 14px}.brand span:last-child{display:none}.switch button{padding:7px 10px}.container,.admin-layout{padding:18px 14px}.hero{padding:28px 20px;border-radius:24px}.hero h1{font-size:30px}.grid.cols-2,.grid.cols-3,.grid.cols-4{grid-template-columns:1fr}.house-grid{grid-template-columns:1fr}.list-card{grid-template-columns:1fr}.list-card .cover{min-height:190px}.bottom-nav{display:flex}.detail-hero,.gallery{grid-template-columns:1fr}.gallery-main{height:280px}.thumbs{grid-template-columns:repeat(3,1fr)}.order-card,.profile-head{grid-template-columns:1fr}.stat-grid{grid-template-columns:1fr}.side-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.calendar-grid{gap:6px}.day-cell{min-height:76px;border-radius:12px}.toast-wrap{left:14px;right:14px;top:74px}.modal{max-height:90vh}.page-title{align-items:flex-start;flex-direction:column}.section-head{align-items:flex-start;flex-direction:column}}
+  </style>
+</head>
+<body>
+  <div id="app" class="app-shell"></div>
+  <div class="modal-backdrop" id="modalBackdrop" onclick="backdropClose(event)">
+    <div class="modal" id="modalBox" onclick="event.stopPropagation()">
+      <div class="modal-head"><h3 id="modalTitle">标题</h3><button class="btn ghost small" onclick="closeModal()">✕</button></div>
+      <div class="modal-body" id="modalBody"></div>
+      <div class="modal-foot" id="modalFoot"></div>
+    </div>
+  </div>
+  <div class="toast-wrap" id="toastWrap"></div>
+<script>
+const statusTabs = ['全部','待确认','待支付','已预订','入住中','已完成','已评价','已取消'];
+const adminStatusTabs = ['全部','待确认','待支付','已预订','入住中','已完成','已评价','已取消','退款中','已退款'];
+const orderActiveStatuses = ['待确认','待支付','已预订','入住中','已完成','已评价','退款中'];
+const today = '2026-06-23';
+const houses = [
+  {id:1,name:'西湖边·轻奢湖景一居',city:'杭州',price:428,cleanFee:60,type:'一居室',rooms:'1室1厅1卫',area:'58㎡',capacity:2,address:'杭州市西湖区北山街88号',host:'林房东',desc:'步行可到西湖，落地窗湖景，适合情侣和短途度假。',rule:'14:00后入住，12:00前退房；禁止聚会，禁止吸烟。',facilities:['WiFi','空调','厨房','投影','洗衣机'],status:'上架',rating:4.9,sales:138,emoji:'🌅'},
+  {id:2,name:'大理古城·花园整套小院',city:'大理',price:680,cleanFee:80,type:'整套',rooms:'3室2厅2卫',area:'120㎡',capacity:6,address:'大理市古城人民路26号',host:'阿月',desc:'独立庭院，适合家庭和朋友出行，距离古城步行5分钟。',rule:'可携带儿童；宠物需提前沟通；晚22点后保持安静。',facilities:['WiFi','空调','厨房','停车位','庭院','洗衣机'],status:'上架',rating:4.8,sales:96,emoji:'🌿'},
+  {id:3,name:'三亚湾·海景两居套房',city:'三亚',price:799,cleanFee:100,type:'两居室',rooms:'2室1厅1卫',area:'88㎡',capacity:4,address:'三亚市天涯区海虹路66号',host:'海叔',desc:'高层海景，楼下沙滩，配备厨房和观景阳台。',rule:'入住需登记身份证；不可举办商业拍摄。',facilities:['WiFi','空调','厨房','阳台','海景','电梯'],status:'上架',rating:4.7,sales:121,emoji:'🏖️'},
+  {id:4,name:'成都宽窄巷子·设计师单间',city:'成都',price:268,cleanFee:40,type:'单间',rooms:'1室0厅1卫',area:'32㎡',capacity:2,address:'成都市青羊区长顺街18号',host:'小曾',desc:'市中心交通便利，简约设计，适合周末城市旅行。',rule:'禁止吸烟；不接待大型宠物。',facilities:['WiFi','空调','投影','电梯'],status:'上架',rating:4.6,sales:202,emoji:'🐼'},
+  {id:5,name:'厦门鼓浪屿·复古洋房',city:'厦门',price:558,cleanFee:70,type:'一居室',rooms:'1室1厅1卫',area:'62㎡',capacity:3,address:'厦门市思明区鼓浪屿晃岩路9号',host:'陈小姐',desc:'百年洋房改造，靠近海边和音乐厅。',rule:'岛上需步行，请轻装出行；21点后请降低音量。',facilities:['WiFi','空调','早餐','庭院'],status:'下架',rating:4.8,sales:73,emoji:'🎻'},
+  {id:6,name:'北京胡同·温馨两居',city:'北京',price:520,cleanFee:65,type:'两居室',rooms:'2室1厅1卫',area:'76㎡',capacity:4,address:'北京市东城区南锣鼓巷52号',host:'老周',desc:'胡同文化体验，靠近地铁，适合家庭出游。',rule:'保护老宅设施；禁止明火。',facilities:['WiFi','空调','厨房','地暖'],status:'上架',rating:4.7,sales:88,emoji:'🏮'}
+];
+const users = [
+  {id:1,username:'demo',password:'123456',name:'沐橙',phone:'13888886666',avatar:'M',status:'正常',regTime:'2026-05-18',orderCount:5},
+  {id:2,username:'traveler',password:'123456',name:'小舟',phone:'13911112222',avatar:'舟',status:'正常',regTime:'2026-04-10',orderCount:2},
+  {id:3,username:'blocked',password:'123456',name:'被禁用户',phone:'13700001111',avatar:'禁',status:'禁用',regTime:'2026-03-22',orderCount:1}
+];
+let orders = [
+  {orderNo:'MS202606080001',houseId:1,userId:1,guestName:'沐橙',phone:'13888886666',checkIn:'2026-06-26',checkOut:'2026-06-28',nights:2,guests:2,amount:886,status:'待确认',paid:false,note:'想要高楼层',createTime:'2026-06-08 09:20'},
+  {orderNo:'MS202606090002',houseId:3,userId:1,guestName:'沐橙',phone:'13888886666',checkIn:'2026-07-04',checkOut:'2026-07-06',nights:2,guests:3,amount:1668,status:'待支付',paid:false,note:'需要两张床',createTime:'2026-06-09 14:33'},
+  {orderNo:'MS202606050003',houseId:2,userId:1,guestName:'沐橙',phone:'13888886666',checkIn:'2026-06-18',checkOut:'2026-06-21',nights:3,guests:5,amount:2090,status:'已预订',paid:true,note:'带老人入住',createTime:'2026-06-05 18:01'},
+  {orderNo:'MS202605150004',houseId:4,userId:1,guestName:'沐橙',phone:'13888886666',checkIn:'2026-06-20',checkOut:'2026-06-22',nights:2,guests:1,amount:546,status:'已完成',paid:true,note:'',createTime:'2026-05-15 11:11'},
+  {orderNo:'MS202604210005',houseId:6,userId:1,guestName:'沐橙',phone:'13888886666',checkIn:'2026-05-01',checkOut:'2026-05-03',nights:2,guests:3,amount:1075,status:'已评价',paid:true,note:'',createTime:'2026-04-21 10:19'},
+  {orderNo:'MS202605010006',houseId:1,userId:2,guestName:'小舟',phone:'13911112222',checkIn:'2026-06-28',checkOut:'2026-06-30',nights:2,guests:2,amount:886,status:'退款中',paid:true,note:'行程变化',createTime:'2026-05-01 09:00'},
+  {orderNo:'MS202604120007',houseId:3,userId:2,guestName:'小舟',phone:'13911112222',checkIn:'2026-06-15',checkOut:'2026-06-17',nights:2,guests:4,amount:1668,status:'入住中',paid:true,note:'',createTime:'2026-04-12 15:21'}
+];
+let reviews = [
+  {id:1,orderNo:'MS202604210005',houseId:6,userId:1,userName:'沐橙',rating:5,clean:5,location:5,service:4,value:5,content:'胡同位置很方便，屋内干净，老人也住得舒服。',images:['review1.webp'],status:'显示',reply:'感谢认可，欢迎下次再来北京。',replyTime:'2026-05-06 12:10',createTime:'2026-05-04 16:20',anonymous:false},
+  {id:2,orderNo:'MS202602170008',houseId:1,userId:2,userName:'匿名用户',rating:4,clean:4,location:5,service:5,value:4,content:'湖景确实漂亮，晚上很安静。',images:[],status:'显示',reply:'谢谢您的建议，我们会继续优化入住体验。',replyTime:'2026-02-22 20:20',createTime:'2026-02-20 14:00',anonymous:true},
+  {id:3,orderNo:'MS202601060009',houseId:4,userId:2,userName:'小舟',rating:3,clean:3,location:5,service:3,value:3,content:'位置不错，但隔音一般。',images:[],status:'隐藏',reply:'已联系保洁和工程师处理。',replyTime:'2026-01-08 10:00',createTime:'2026-01-07 09:10',anonymous:false}
+];
+let favoriteSet = new Set([1,3,6]);
+let availabilityLocks = {1:['2026-06-24'],2:['2026-06-25','2026-06-26'],3:['2026-06-29'],4:[],5:['2026-06-27'],6:['2026-06-30']};
+let config = {cities:['杭州','大理','三亚','成都','厦门','北京'],tags:['WiFi','空调','厨房','投影','洗衣机','停车位','庭院','阳台','海景','电梯','早餐','地暖'],defaultDiscount:30,payTimeout:30,freeCancelHours:24,reviewDays:30};
+const App = {
+  mode:'user', userPage:'home', adminPage:'login', userLogged:true, adminLogged:false, currentUserId:1,
+  currentHouseId:1, currentOrderNo:null,
+  search:{keyword:'',city:'',checkIn:'2026-06-23',checkOut:'2026-06-25',guests:2,minPrice:'',maxPrice:'',type:'',sort:'推荐'},
+  booking:{houseId:1,checkIn:'2026-06-23',checkOut:'2026-06-25',guests:2},
+  orderTab:'全部', orderPage:1, favPage:1,
+  adminFilters:{houseKeyword:'',houseStatus:'全部',orderKeyword:'',orderHouse:'',orderUser:'',orderPhone:'',orderStatus:'全部',reviewStatus:'全部',userKeyword:''},
+  adminPages:{houses:1,orders:1,reviews:1,users:1},
+  adminHouseId:1, adminMonth:'2026-06', pendingAction:null,
+  reviewDraft:null
+};
+function $(id){return document.getElementById(id)}
+function esc(v){return String(v ?? '').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
+function money(n){return '¥'+Number(n||0).toFixed(0)}
+function getCurrentUser(){return users.find(u=>u.id===App.currentUserId)||users[0]}
+function getHouse(id){return houses.find(h=>h.id===Number(id))}
+function getOrder(no){return orders.find(o=>o.orderNo===no)}
+function getUser(id){return users.find(u=>u.id===Number(id))}
+function statusPill(s){return `<span class="status-pill status-${s}">● ${s}</span>`}
+function maskPhone(phone){phone=String(phone||'');return phone.length===11?phone.slice(0,3)+'****'+phone.slice(7):phone}
+function dateToMs(d){const [y,m,day]=String(d).split('-').map(Number);return Date.UTC(y,m-1,day)}
+function fmtUTC(t){const d=new Date(t);return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')+'-'+String(d.getUTCDate()).padStart(2,'0')}
+function addDays(d,n){return fmtUTC(dateToMs(d)+n*86400000)}
+function dateDiff(a,b){return Math.round((dateToMs(b)-dateToMs(a))/86400000)}
+function datesBetween(a,b){const days=[];const n=dateDiff(a,b);for(let i=0;i<n;i++)days.push(addDays(a,i));return days}
+function overlap(a1,a2,b1,b2){return dateToMs(a1)<dateToMs(b2)&&dateToMs(b1)<dateToMs(a2)}
+function calcAmount(h,checkIn,checkOut){const nights=Math.max(0,dateDiff(checkIn,checkOut));return Math.max(0,h.price*nights+h.cleanFee-Number(config.defaultDiscount||0))}
+function isActiveOrder(o){return orderActiveStatuses.includes(o.status)}
+function getBookedOrder(houseId,date){return orders.find(o=>Number(o.houseId)===Number(houseId)&&isActiveOrder(o)&&dateToMs(date)>=dateToMs(o.checkIn)&&dateToMs(date)<dateToMs(o.checkOut))}
+function getDateStatus(houseId,date){if(getBookedOrder(houseId,date)) return '已订'; if((availabilityLocks[houseId]||[]).includes(date)) return '锁定'; return '可订'}
+function availability(h, opts={}){
+  const guests=Number(opts.guests ?? App.search.guests);
+  const checkIn=opts.checkIn ?? App.search.checkIn;
+  const checkOut=opts.checkOut ?? App.search.checkOut;
+  if(!h) return {ok:false,reason:'房源不存在'};
+  if(h.status!=='上架') return {ok:false,reason:'房源已下架'};
+  if(!checkIn||!checkOut||dateDiff(checkIn,checkOut)<1) return {ok:false,reason:'请选择有效入住日期'};
+  if(guests>h.capacity) return {ok:false,reason:'入住人数超过上限'};
+  const days=datesBetween(checkIn,checkOut);
+  if(days.some(d=>(availabilityLocks[h.id]||[]).includes(d))) return {ok:false,reason:'所选日期存在锁定房态'};
+  if(orders.some(o=>Number(o.houseId)===h.id&&isActiveOrder(o)&&overlap(checkIn,checkOut,o.checkIn,o.checkOut))) return {ok:false,reason:'所选日期已被订单占用'};
+  return {ok:true,reason:'可预约'};
+}
+function canFilterHouse(h){
+  const s=App.search; const kw=(s.keyword||'').trim().toLowerCase();
+  if(kw && ![h.name,h.city,h.address,h.host,h.type,...h.facilities].join(' ').toLowerCase().includes(kw)) return false;
+  if(s.city && h.city!==s.city) return false;
+  if(s.type && h.type!==s.type) return false;
+  if(s.minPrice && h.price<Number(s.minPrice)) return false;
+  if(s.maxPrice && h.price>Number(s.maxPrice)) return false;
+  return true;
+}
+function sortedHouses(list){
+  const arr=[...list]; const sort=App.search.sort;
+  if(sort==='价格升序') arr.sort((a,b)=>a.price-b.price);
+  if(sort==='评分优先') arr.sort((a,b)=>b.rating-a.rating);
+  if(sort==='销量优先') arr.sort((a,b)=>b.sales-a.sales);
+  if(sort==='推荐') arr.sort((a,b)=>(b.status==='上架')-(a.status==='上架') || b.rating-a.rating);
+  return arr;
+}
+function showToast(msg,type='ok'){
+  const el=document.createElement('div');el.className='toast '+type;el.textContent=msg; $('toastWrap').appendChild(el);
+  setTimeout(()=>{el.style.opacity='0';el.style.transform='translateY(-8px)';setTimeout(()=>el.remove(),220)},2300);
+}
+function showModal(title,body,foot='',size=''){
+  $('modalBox').className='modal '+size; $('modalTitle').innerHTML=title; $('modalBody').innerHTML=body; $('modalFoot').innerHTML=foot || `<button class="btn ghost" onclick="closeModal()">关闭</button>`; $('modalBackdrop').classList.add('show');
+}
+function closeModal(){ $('modalBackdrop').classList.remove('show') }
+function backdropClose(e){ if(e.target.id==='modalBackdrop') closeModal() }
+function confirmAction(msg,fn){ App.pendingAction=fn; showModal('请确认',`<p class="mb0">${esc(msg)}</p>`, `<button class="btn ghost" onclick="closeModal()">取消</button><button class="btn red" onclick="runPendingAction()">确认操作</button>`,'sm') }
+function runPendingAction(){ const fn=App.pendingAction; App.pendingAction=null; closeModal(); if(fn) fn(); }
+function paginate(list,page=1,size=20){const total=Math.max(1,Math.ceil(list.length/size));const p=Math.min(Math.max(1,page),total);return {items:list.slice((p-1)*size,p*size),page:p,total}}
+function paginationHtml(kind,page,total){return `<div class="pagination"><span>每页20条 · 第 ${page}/${total} 页</span><button class="btn ghost small" onclick="changePage('${kind}',-1)">上一页</button><button class="btn ghost small" onclick="changePage('${kind}',1)">下一页</button></div>`}
+function changePage(kind,delta){
+  if(kind==='orders') App.orderPage+=delta;
+  if(kind==='favorites') App.favPage+=delta;
+  if(['houses','adminOrders','reviews','users'].includes(kind)){
+    const map={houses:'houses',adminOrders:'orders',reviews:'reviews',users:'users'}; App.adminPages[map[kind]]+=delta;
+  }
+  render(false);
+}
+function switchMode(mode){App.mode=mode; if(mode==='user') App.userPage=App.userPage||'home'; if(mode==='admin'&&!App.adminLogged) App.adminPage='login'; render()}
+function goUser(page){App.mode='user';App.userPage=page;render()}
+function goAdmin(page){App.mode='admin'; if(!App.adminLogged){App.adminPage='login'}else{App.adminPage=page} render()}
+function ensureUserLogin(){ if(App.userLogged) return true; showLoginModal(); return false; }
+function render(scroll=true){
+  const app=$('app');
+  app.innerHTML = topbar() + (App.mode==='admin'?adminShell():userShell()) + bottomNav();
+  if(scroll) window.scrollTo({top:0,behavior:'smooth'});
+}
+function topbar(){
+  const user=getCurrentUser();
+  const userNav=['home:首页','houses:房源','orders:我的订单','favorites:收藏','profile:个人中心'].map(x=>{const [k,v]=x.split(':');return `<button class="${App.mode==='user'&&App.userPage===k?'active':''}" onclick="goUser('${k}')">${v}</button>`}).join('');
+  const adminQuick = App.adminLogged ? `<button class="btn ghost small" onclick="adminLogout()">退出后台</button>` : '';
+  const userAction = App.userLogged ? `<button class="btn soft small" onclick="goUser('profile')">👤 ${esc(user.name)}</button><button class="btn ghost small" onclick="userLogout()">退出</button>` : `<button class="btn soft small" onclick="showLoginModal()">登录/注册</button>`;
+  return `<div class="topbar"><div class="brand" onclick="goUser('home')" style="cursor:pointer"><div class="brand-mark">宿</div><span>民宿预约管理系统</span></div><div class="top-actions"><div class="switch"><button class="${App.mode==='user'?'active':''}" onclick="switchMode('user')">用户端</button><button class="${App.mode==='admin'?'active':''}" onclick="switchMode('admin')">管理端</button></div><div class="nav">${App.mode==='user'?userNav:adminQuick}</div>${App.mode==='user'?userAction:''}</div></div>`;
+}
+function bottomNav(){
+  if(App.mode!=='user') return '';
+  const items=[['home','🏠','首页'],['houses','🔎','房源'],['orders','📋','订单'],['favorites','❤️','收藏'],['profile','👤','我的']];
+  return `<div class="bottom-nav">${items.map(i=>`<button class="${App.userPage===i[0]?'active':''}" onclick="goUser('${i[0]}')"><div>${i[1]}</div>${i[2]}</button>`).join('')}</div>`;
+}
+function userShell(){
+  const pages={home:renderHome,houses:renderHouseList,detail:renderHouseDetail,booking:renderBooking,success:renderSuccess,orders:renderOrders,orderDetail:renderOrderDetail,review:renderReviewPage,profile:renderProfile,favorites:renderFavorites};
+  return `<main class="container">${(pages[App.userPage]||renderHome)()}</main>`;
+}
+function adminShell(){
+  if(!App.adminLogged) return `<main class="container">${renderAdminLogin()}</main>`;
+  const nav=[['dashboard','📊','数据看板'],['houses','🏡','房源管理'],['availability','🗓️','房态维护'],['orders','📋','订单管理'],['reviews','⭐','评价管理'],['users','👥','用户管理'],['config','⚙️','系统配置']];
+  const pages={dashboard:renderDashboard,houses:renderAdminHouses,availability:renderAvailability,orders:renderAdminOrders,reviews:renderAdminReviews,users:renderAdminUsers,config:renderConfig};
+  return `<div class="admin-layout"><aside class="sidebar"><div class="side-title">管理菜单</div><div class="side-grid">${nav.map(n=>`<button class="side-btn ${App.adminPage===n[0]?'active':''}" onclick="goAdmin('${n[0]}')"><span>${n[1]}</span>${n[2]}</button>`).join('')}</div></aside><main class="main">${(pages[App.adminPage]||renderDashboard)()}</main></div>`;
+}
+function renderHome(){
+  const rec=houses.filter(h=>h.status==='上架').slice(0,3);
+  return `<section class="hero"><h1>找一间有温度的民宿，完成从搜索到评价的预约闭环</h1><p>快捷搜索、房源筛选、在线预约、模拟支付、订单跟踪与评价管理，都可以在这个原型中点击体验。</p><div class="search-card"><div class="grid cols-4"><div class="field"><label>城市 / 关键词</label><input id="homeKeyword" value="${esc(App.search.keyword)}" placeholder="如：杭州、西湖、海景" /></div><div class="field"><label>入住日期</label><input id="homeCheckIn" type="date" value="${App.search.checkIn}" /></div><div class="field"><label>离店日期</label><input id="homeCheckOut" type="date" value="${App.search.checkOut}" /></div><div class="field"><label>入住人数</label><input id="homeGuests" type="number" min="1" value="${App.search.guests}" /></div></div><div class="row mt16 right"><button class="btn ghost" onclick="fillTodayTwoNights()">默认2晚</button><button class="btn primary" onclick="runSearchFromHome()">🔎 搜索房源</button></div></div></section>
+  <section class="section"><div class="section-head"><div><h2>热门城市快捷导航</h2><p>点击城市会带入筛选条件并进入房源列表。</p></div><button class="btn ghost" onclick="resetFilters();goUser('houses')">查看全部房源</button></div><div class="row">${config.cities.map(c=>`<button class="btn soft" onclick="quickCity('${c}')">📍 ${c}</button>`).join('')}</div></section>
+  <section class="section"><div class="section-head"><div><h2>推荐上架房源</h2><p>最多展示3套上架房源，点击卡片可进入详情。</p></div><button class="btn ghost" onclick="goUser('houses')">更多房源 →</button></div><div class="house-grid">${rec.map((h,i)=>houseCard(h,i)).join('')}</div></section>`;
+}
+function fillTodayTwoNights(){ $('homeCheckIn').value=today; $('homeCheckOut').value=addDays(today,2); showToast('已按当前日期预填2晚') }
+function runSearchFromHome(){
+  App.search.keyword=$('homeKeyword').value.trim(); App.search.checkIn=$('homeCheckIn').value; App.search.checkOut=$('homeCheckOut').value; App.search.guests=Number($('homeGuests').value||1); App.search.city=''; App.userPage='houses'; render();
+}
+function quickCity(city){App.search.city=city;App.search.keyword='';App.userPage='houses';render()}
+function resetFilters(){App.search={keyword:'',city:'',checkIn:'2026-06-23',checkOut:'2026-06-25',guests:2,minPrice:'',maxPrice:'',type:'',sort:'推荐'};showToast('已重置筛选条件')}
+function houseCard(h,i=0,list=false){
+  const av=availability(h); const fav=favoriteSet.has(h.id); const cls='c'+(((i||h.id)%6)+1);
+  const body=`<div class="house-title"><h3>${esc(h.name)}</h3><button class="btn ${fav?'red':'ghost'} small" onclick="toggleFavorite(event,${h.id})">${fav?'♥':'♡'}</button></div><div class="row muted"><span>📍 ${h.city}</span><span>⭐ ${h.rating}</span><span>已订${h.sales}</span></div><div class="tags mt12"><span class="tag brand">${h.type}</span><span class="tag">${h.rooms}</span><span class="tag">最多${h.capacity}人</span>${h.status==='下架'?'<span class="tag red">已下架</span>':''}<span class="tag ${av.ok?'green':'amber'}">${av.reason}</span></div><div class="between mt16"><div><span class="price">${money(h.price)}</span><span class="muted"> / 晚</span></div><button class="btn ${av.ok?'primary':'disabled'} small" onclick="event.stopPropagation();tryBook(${h.id})">立即预约</button></div>`;
+  if(list) return `<div class="card house-card list-card" onclick="goDetail(${h.id})"><div class="cover ${cls}"><span class="emoji">${h.emoji}</span><div><b>${h.city}</b><br/><span>${h.address}</span></div></div><div class="house-body">${body}<p class="muted mt12">${esc(h.desc)}</p></div></div>`;
+  return `<div class="card house-card" onclick="goDetail(${h.id})"><div class="cover ${cls}"><span class="emoji">${h.emoji}</span><div><b>${h.city}</b><br/><span>${h.address}</span></div></div><div class="house-body">${body}</div></div>`;
+}
+function toggleFavorite(event,id){ if(event) event.stopPropagation(); if(!ensureUserLogin()) return; if(favoriteSet.has(id)){favoriteSet.delete(id);showToast('已取消收藏')}else{favoriteSet.add(id);showToast('已加入收藏')} render(false) }
+function goDetail(id){App.currentHouseId=id;App.userPage='detail';render()}
+function tryBook(id){ const h=getHouse(id); const av=availability(h,{checkIn:App.search.checkIn,checkOut:App.search.checkOut,guests:App.search.guests}); if(!av.ok){showToast(av.reason,'warn');return} if(!ensureUserLogin())return; App.booking={houseId:id,checkIn:App.search.checkIn,checkOut:App.search.checkOut,guests:Number(App.search.guests)||1}; App.userPage='booking'; render() }
+function renderHouseList(){
+  const list=sortedHouses(houses.filter(canFilterHouse));
+  return `<div class="page-title"><div><h1>房源列表</h1><p>支持关键词、城市、日期、人数、价格、房型和排序组合筛选。</p></div><button class="btn ghost" onclick="resetFilters();render()">重置筛选</button></div><div class="list-layout"><aside class="filter-panel filter-side"><div class="grid"><div class="field"><label>关键词</label><input id="listKeyword" value="${esc(App.search.keyword)}" placeholder="名称/城市/设施" /></div><div class="field"><label>城市</label><select id="listCity"><option value="">全部城市</option>${config.cities.map(c=>`<option ${App.search.city===c?'selected':''}>${c}</option>`).join('')}</select></div><div class="grid cols-2"><div class="field"><label>入住</label><input id="listCheckIn" type="date" value="${App.search.checkIn}" /></div><div class="field"><label>离店</label><input id="listCheckOut" type="date" value="${App.search.checkOut}" /></div></div><div class="field"><label>人数</label><input id="listGuests" type="number" min="1" value="${App.search.guests}" /></div><div class="grid cols-2"><div class="field"><label>最低价</label><input id="listMinPrice" type="number" value="${esc(App.search.minPrice)}" placeholder="不限" /></div><div class="field"><label>最高价</label><input id="listMaxPrice" type="number" value="${esc(App.search.maxPrice)}" placeholder="不限" /></div></div><div class="field"><label>房型</label><select id="listType"><option value="">全部房型</option>${['单间','一居室','两居室','整套'].map(t=>`<option ${App.search.type===t?'selected':''}>${t}</option>`).join('')}</select></div><div class="field"><label>排序</label><select id="listSort">${['推荐','价格升序','评分优先','销量优先'].map(t=>`<option ${App.search.sort===t?'selected':''}>${t}</option>`).join('')}</select></div><button class="btn primary full" onclick="applyListFilters()">应用筛选</button></div></aside><section><div class="between mb0"><span class="muted">找到 <b>${list.length}</b> 套房源</span><span class="muted">当前日期：${App.search.checkIn} 至 ${App.search.checkOut}</span></div><div class="list-stack mt16">${list.length?list.map((h,i)=>houseCard(h,i,true)).join(''):`<div class="empty"><div class="big">🏡</div><b>暂无符合条件的房源</b><p>请调整筛选条件后重新搜索。</p><button class="btn primary" onclick="resetFilters();render()">一键重置</button></div>`}</div></section></div>`;
+}
+function applyListFilters(){
+  App.search.keyword=$('listKeyword').value.trim(); App.search.city=$('listCity').value; App.search.checkIn=$('listCheckIn').value; App.search.checkOut=$('listCheckOut').value; App.search.guests=Number($('listGuests').value||1); App.search.minPrice=$('listMinPrice').value; App.search.maxPrice=$('listMaxPrice').value; App.search.type=$('listType').value; App.search.sort=$('listSort').value; render(false); showToast('筛选已更新');
+}
+function filterByFacility(tag){App.search.keyword=tag;App.userPage='houses';render()}
+function renderHouseDetail(){
+  const h=getHouse(App.currentHouseId)||houses[0]; const av=availability(h); const nights=Math.max(1,dateDiff(App.search.checkIn,App.search.checkOut)); const amount=calcAmount(h,App.search.checkIn,App.search.checkOut); const fav=favoriteSet.has(h.id); const visibleReviews=reviews.filter(r=>r.houseId===h.id&&r.status==='显示');
+  return `<div class="page-title"><div><h1>${esc(h.name)}</h1><p>${h.city} · ${h.address} · ${h.host}</p></div><button class="btn ghost" onclick="goUser('houses')">← 返回列表</button></div><div class="detail-hero"><section class="gallery"><div class="cover gallery-main c${(h.id%6)+1}" onclick="showToast('封面图预览：原型中使用占位图')"><span class="emoji">${h.emoji}</span><div><b>${h.name}</b><br/>${h.desc}</div></div><div class="thumbs"><div class="thumb c2" onclick="showToast('切换到客厅图片')">🛋️</div><div class="thumb c3" onclick="showToast('切换到卧室图片')">🛏️</div><div class="thumb c4" onclick="showToast('切换到周边图片')">📍</div></div></section><aside class="card pad sticky-book"><div class="between"><div><span class="price">${money(h.price)}</span><span class="muted"> / 晚</span></div>${statusPill(h.status==='上架'?'已预订'.replace('已预订','可预约演示'):h.status)}</div><div class="grid cols-2 mt16"><div class="field"><label>入住日期</label><input id="detailCheckIn" type="date" value="${App.search.checkIn}" /></div><div class="field"><label>离店日期</label><input id="detailCheckOut" type="date" value="${App.search.checkOut}" /></div></div><div class="field mt12"><label>入住人数</label><input id="detailGuests" type="number" min="1" value="${App.search.guests}" /></div><button class="btn ghost full mt12" onclick="refreshDetailFee()">重新计算费用</button><div id="feeBox" class="mt12">${feeBoxHtml(h,App.search.checkIn,App.search.checkOut,App.search.guests)}</div><div class="row mt16"><button class="btn ${fav?'red':'ghost'}" onclick="toggleFavorite(event,${h.id})">${fav?'♥ 已收藏':'♡ 收藏房源'}</button><button class="btn primary" onclick="tryBookFromDetail(${h.id})">立即预约</button></div><button class="btn soft full mt12" onclick="showToast('联系房东为占位入口，当前不实现即时通讯','warn')">联系房东</button></aside></div><section class="section grid cols-3"><div class="mini-card"><b>房型面积</b><p class="muted">${h.type} · ${h.rooms} · ${h.area}</p></div><div class="mini-card"><b>可住人数</b><p class="muted">最多 ${h.capacity} 人入住</p></div><div class="mini-card"><b>评分销量</b><p class="muted">⭐ ${h.rating} · 已订 ${h.sales} 单</p></div></section><section class="section card pad"><h2>配套设施</h2><div class="tags mt12">${h.facilities.map(t=>`<button class="tag brand" onclick="filterByFacility('${t}')">${t}</button>`).join('')}</div><h2 class="mt20">房源介绍</h2><p class="muted">${esc(h.desc)}</p><h2 class="mt20">入住须知</h2><p class="muted">${esc(h.rule)}</p></section><section class="section card pad"><div class="between"><h2>用户评价</h2><span class="tag purple">仅展示“显示”状态评价</span></div>${visibleReviews.length?visibleReviews.map(reviewItem).join(''):'<div class="empty mt12">暂无展示中的评价</div>'}</section>`;
+}
+function feeBoxHtml(h,ci,co,guests){const nights=Math.max(0,dateDiff(ci,co));const amount=calcAmount(h,ci,co);const av=availability(h,{checkIn:ci,checkOut:co,guests:Number(guests)});return `<div class="fee-row"><span>${money(h.price)} × ${nights} 晚</span><b>${money(h.price*nights)}</b></div><div class="fee-row"><span>清洁费</span><b>${money(h.cleanFee)}</b></div><div class="fee-row"><span>系统优惠</span><b>- ${money(config.defaultDiscount)}</b></div><div class="fee-row"><span>可预约状态</span><b class="${av.ok?'':'muted'}">${av.reason}</b></div><div class="between mt12"><span>合计</span><span class="fee-total">${money(amount)}</span></div>`}
+function refreshDetailFee(){App.search.checkIn=$('detailCheckIn').value;App.search.checkOut=$('detailCheckOut').value;App.search.guests=Number($('detailGuests').value||1);$('feeBox').innerHTML=feeBoxHtml(getHouse(App.currentHouseId),App.search.checkIn,App.search.checkOut,App.search.guests);showToast('费用已重新计算')}
+function tryBookFromDetail(id){refreshDetailFee();tryBook(id)}
+function reviewItem(r){return `<div class="mini-card mt12"><div class="between"><div><b>${esc(r.userName)}</b><span class="muted"> · ${r.createTime}</span></div><span class="tag amber">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span></div><p>${esc(r.content)}</p>${r.reply?`<div class="hint"><b>商家回复：</b>${esc(r.reply)}</div>`:''}</div>`}
+function renderBooking(){
+  if(!ensureUserLogin()) return `<div class="empty">请先登录</div>`;
+  const h=getHouse(App.booking.houseId)||houses[0]; const ci=App.booking.checkIn, co=App.booking.checkOut, guests=App.booking.guests; const av=availability(h,{checkIn:ci,checkOut:co,guests});
+  return `<div class="page-title"><div><h1>预约下单</h1><p>提交后生成“待确认”订单，后台确认后进入待支付。</p></div><button class="btn ghost" onclick="goDetail(${h.id})">← 返回详情</button></div><div class="grid cols-2"><section class="card pad"><h2>入住信息</h2><div class="grid cols-2 mt16"><div class="field"><label>入住日期</label><input id="bookCheckIn" type="date" value="${ci}" onchange="updateBookingFee()" /></div><div class="field"><label>离店日期</label><input id="bookCheckOut" type="date" value="${co}" onchange="updateBookingFee()" /></div></div><div class="field mt12"><label>入住人数</label><input id="bookGuests" type="number" min="1" value="${guests}" onchange="updateBookingFee()" /></div><h2 class="mt20">联系人</h2><div class="grid cols-2 mt12"><div class="field"><label>联系人姓名 *</label><input id="bookName" value="${esc(getCurrentUser().name)}" /></div><div class="field"><label>手机号 *</label><input id="bookPhone" value="${esc(getCurrentUser().phone)}" /></div></div><div class="field mt12"><label>备注</label><textarea id="bookNote" placeholder="可填写预计到达时间、特殊需求等"></textarea></div><button class="btn primary full mt16" onclick="submitBooking()">提交预约</button></section><aside class="card pad sticky-book"><div class="cover c${(h.id%6)+1}" style="height:180px;border-radius:20px"><span class="emoji">${h.emoji}</span><div><b>${h.name}</b><br/>${h.city} · ${h.type}</div></div><div id="bookFee" class="mt16">${feeBoxHtml(h,ci,co,guests)}</div><div class="hint mt16">表单校验：姓名非空、手机号11位且以1开头、至少入住1晚、人数不超过房源容量，并提交前再次校验房态。</div></aside></div>`;
+}
+function updateBookingFee(){const h=getHouse(App.booking.houseId);App.booking.checkIn=$('bookCheckIn').value;App.booking.checkOut=$('bookCheckOut').value;App.booking.guests=Number($('bookGuests').value||1);$('bookFee').innerHTML=feeBoxHtml(h,App.booking.checkIn,App.booking.checkOut,App.booking.guests)}
+function submitBooking(){
+  updateBookingFee(); const h=getHouse(App.booking.houseId); const name=$('bookName').value.trim(); const phone=$('bookPhone').value.trim(); const note=$('bookNote').value.trim(); const av=availability(h,{checkIn:App.booking.checkIn,checkOut:App.booking.checkOut,guests:App.booking.guests});
+  if(!name){showToast('姓名不能为空','err');return} if(!/^1\d{10}$/.test(phone)){showToast('手机号必须为11位且以1开头','err');return} if(dateDiff(App.booking.checkIn,App.booking.checkOut)<1){showToast('离店日期必须晚于入住日期','err');return} if(App.booking.guests>h.capacity){showToast('入住人数不能超过房源最大可住人数','err');return} if(!av.ok){showToast(av.reason,'err');return}
+  const seq=String(orders.length+1).padStart(4,'0'); const no='MS'+today.replace(/-/g,'')+seq; const amount=calcAmount(h,App.booking.checkIn,App.booking.checkOut);
+  orders.unshift({orderNo:no,houseId:h.id,userId:App.currentUserId,guestName:name,phone,checkIn:App.booking.checkIn,checkOut:App.booking.checkOut,nights:dateDiff(App.booking.checkIn,App.booking.checkOut),guests:App.booking.guests,amount,status:'待确认',paid:false,note,createTime:today+' 10:30'});
+  App.currentOrderNo=no; App.userPage='success'; showToast('预约提交成功，等待后台确认'); render();
+}
+function renderSuccess(){const o=getOrder(App.currentOrderNo); const h=o?getHouse(o.houseId):null; return `<div class="card pad" style="text-align:center;max-width:760px;margin:40px auto"><div style="font-size:60px">✅</div><h1>预约提交成功</h1><p class="muted">订单已生成，状态为“待确认”。后台管理员确认后，用户可进行模拟支付。</p>${o?`<div class="hint mt16"><b>订单号：</b>${o.orderNo}　<b>房源：</b>${h.name}　<b>金额：</b>${money(o.amount)}</div>`:''}<div class="row center right mt20" style="justify-content:center"><button class="btn primary" onclick="App.orderTab='全部';goUser('orders')">查看我的订单</button><button class="btn ghost" onclick="goUser('home')">返回首页</button></div></div>`}
+function renderOrders(){
+  if(!ensureUserLogin()) return `<div class="empty">请先登录</div>`;
+  const list=orders.filter(o=>o.userId===App.currentUserId && (App.orderTab==='全部'||o.status===App.orderTab)); const p=paginate(list,App.orderPage,20); App.orderPage=p.page;
+  return `<div class="page-title"><div><h1>我的订单</h1><p>可按状态筛选，并完成取消、模拟支付、查看详情、发表评价等操作。</p></div><button class="btn ghost" onclick="goUser('houses')">继续预订</button></div><div class="tabs">${statusTabs.map(t=>`<button class="tab ${App.orderTab===t?'active':''}" onclick="App.orderTab='${t}';App.orderPage=1;render(false)">${t}</button>`).join('')}</div><div class="list-stack mt16">${p.items.length?p.items.map(orderCard).join(''):`<div class="empty"><div class="big">📋</div>当前状态暂无订单</div>`}</div>${paginationHtml('orders',p.page,p.total)}`;
+}
+function orderCard(o){const h=getHouse(o.houseId);return `<div class="order-card"><div><div class="between"><b>${o.orderNo}</b>${statusPill(o.status)}</div><p class="muted">${h?h.name:'房源已删除'} · ${o.checkIn} 至 ${o.checkOut} · ${o.nights}晚 · ${o.guests}人</p><div class="row"><span class="tag brand">${money(o.amount)}</span><span class="tag ${o.paid?'green':'gray'}">${o.paid?'已支付':'未支付'}</span><span class="tag">创建：${o.createTime}</span></div></div><div class="row right">${userOrderActions(o)}</div></div>`}
+function userOrderActions(o){let btn=`<button class="btn ghost small" onclick="goOrderDetail('${o.orderNo}')">查看详情</button>`; if(['待确认','待支付','已预订'].includes(o.status)) btn+=`<button class="btn red small" onclick="cancelOrder('${o.orderNo}')">取消订单</button>`; if(o.status==='待支付') btn+=`<button class="btn primary small" onclick="payOrder('${o.orderNo}')">模拟支付</button>`; if(o.status==='已完成') btn+=`<button class="btn purple small" onclick="goReview('${o.orderNo}')">去评价</button>`; if(o.status==='已评价') btn+=`<button class="btn blue small" onclick="showOrderReview('${o.orderNo}')">查看评价</button>`; return btn}
+function goOrderDetail(no){App.currentOrderNo=no;App.userPage='orderDetail';render()}
+function cancelOrder(no){confirmAction('确认取消订单 '+no+'？取消后状态将变为“已取消”。',()=>{const o=getOrder(no); if(o){o.status='已取消';o.paid=false;showToast('订单已取消');render(false)}})}
+function payOrder(no){const o=getOrder(no); if(o&&o.status==='待支付'){o.status='已预订';o.paid=true;showToast('模拟支付成功，订单已预订');render(false)}else showToast('当前订单不可支付','warn')}
+function goReview(no){App.currentOrderNo=no;App.userPage='review';App.reviewDraft=null;render()}
+function showOrderReview(no){const r=reviews.find(x=>x.orderNo===no); if(!r){showToast('未找到评价','warn');return} showModal('订单评价',reviewItem(r),`<button class="btn primary" onclick="closeModal()">知道了</button>`)}
+function renderOrderDetail(){
+  const o=getOrder(App.currentOrderNo); if(!o) return `<div class="empty">订单不存在</div>`; const h=getHouse(o.houseId);
+  return `<div class="page-title"><div><h1>订单详情</h1><p>${o.orderNo}</p></div><button class="btn ghost" onclick="goUser('orders')">← 返回订单</button></div><div class="grid cols-2"><section class="card pad"><h2>订单信息</h2><div class="kv"><b>订单编号</b><span>${o.orderNo}</span></div><div class="kv"><b>订单状态</b><span>${statusPill(o.status)}</span></div><div class="kv"><b>创建时间</b><span>${o.createTime}</span></div><div class="kv"><b>支付状态</b><span>${o.paid?'已支付':'未支付'}</span></div><h2 class="mt20">入住信息</h2><div class="kv"><b>日期</b><span>${o.checkIn} 至 ${o.checkOut}，${o.nights} 晚</span></div><div class="kv"><b>人数</b><span>${o.guests} 人</span></div><div class="kv"><b>联系人</b><span>${esc(o.guestName)} · ${maskPhone(o.phone)}</span></div><div class="kv"><b>备注</b><span>${esc(o.note||'无')}</span></div><div class="row mt16">${userOrderActions(o)}</div></section><aside class="card pad"><div class="cover c${((h?.id||1)%6)+1}" style="height:190px;border-radius:20px"><span class="emoji">${h?.emoji||'🏡'}</span><div><b>${h?h.name:'房源已删除'}</b><br/>${h?h.address:'订单保留历史信息'}</div></div><h2 class="mt20">费用明细</h2>${h?feeBoxHtml(h,o.checkIn,o.checkOut,o.guests):''}<div class="hint mt16">手机号已按前3后4规则脱敏展示。</div></aside></div>`;
+}
+function renderReviewPage(){
+  const o=getOrder(App.currentOrderNo); if(!o) return `<div class="empty">订单不存在</div>`; if(o.status!=='已完成') return `<div class="empty">仅“已完成”订单可评价 <div class="mt16"><button class="btn ghost" onclick="goUser('orders')">返回订单</button></div></div>`; const h=getHouse(o.houseId);
+  const dims=[['rating','整体评分'],['clean','卫生'],['location','位置'],['service','服务'],['value','性价比']];
+  return `<div class="page-title"><div><h1>发表评价</h1><p>${h.name} · ${o.orderNo}</p></div><button class="btn ghost" onclick="goUser('orders')">← 返回订单</button></div><div class="grid cols-2"><section class="card pad"><h2>多维度评分</h2>${dims.map(d=>`<div class="between mt12"><b>${d[1]}</b>${starWidget(d[0],5)}</div>`).join('')}<div class="field mt20"><label>评价内容 *</label><textarea id="reviewContent" placeholder="请分享真实入住体验"></textarea></div><label class="file-drop mt12"><input id="reviewImages" type="file" accept="image/png,image/jpeg,image/webp" multiple style="display:none" onchange="showImageCount()" />📷 点击上传评价图片（JPG/PNG/WEBP，单张≤5MB）<div id="imageCount" class="muted mt8">暂未选择图片</div></label><label class="check-tag mt12"><input id="reviewAnonymous" type="checkbox" /> 匿名评价</label><button class="btn primary full mt20" onclick="submitReview()">提交评价</button></section><aside class="card pad"><div class="cover c${(h.id%6)+1}" style="height:190px;border-radius:20px"><span class="emoji">${h.emoji}</span><div><b>${h.name}</b><br/>${o.checkIn} 至 ${o.checkOut}</div></div><div class="hint mt16">提交后：评价保存为“显示”，订单状态变为“已评价”，房源平均评分会重新计算。</div></aside></div>`;
+}
+function starWidget(name,val){return `<input type="hidden" id="star_${name}" value="${val}"><div class="stars" id="stars_${name}">${[1,2,3,4,5].map(i=>`<button class="star ${i<=val?'on':''}" onclick="setStar('${name}',${i})">★</button>`).join('')}</div>`}
+function setStar(name,val){$('star_'+name).value=val;[...$('stars_'+name).querySelectorAll('.star')].forEach((s,i)=>s.classList.toggle('on',i<val))}
+function showImageCount(){const n=$('reviewImages').files.length;$('imageCount').textContent=n?`已选择 ${n} 张图片`:'暂未选择图片'}
+function submitReview(){const o=getOrder(App.currentOrderNo); const content=$('reviewContent').value.trim(); if(!content){showToast('请填写评价内容','err');return} const anon=$('reviewAnonymous').checked; const imgs=[...$('reviewImages').files].map(f=>f.name); const r={id:reviews.length+1,orderNo:o.orderNo,houseId:o.houseId,userId:o.userId,userName:anon?'匿名用户':getCurrentUser().name,rating:Number($('star_rating').value),clean:Number($('star_clean').value),location:Number($('star_location').value),service:Number($('star_service').value),value:Number($('star_value').value),content,images:imgs,status:'显示',reply:'',replyTime:'',createTime:today+' 11:00',anonymous:anon}; reviews.unshift(r); o.status='已评价'; recalcHouseRating(o.houseId); showToast('评价提交成功'); App.orderTab='已评价'; App.userPage='orders'; render()}
+function recalcHouseRating(houseId){const rs=reviews.filter(r=>r.houseId===houseId&&r.status==='显示');const h=getHouse(houseId);if(h&&rs.length){h.rating=Math.round(rs.reduce((s,r)=>s+r.rating,0)/rs.length*10)/10}}
+function renderProfile(){
+  if(!ensureUserLogin()) return `<div class="empty">请先登录</div>`; const u=getCurrentUser(); const userOrders=orders.filter(o=>o.userId===u.id); const stats=[['全部订单',userOrders.length,()=>{App.orderTab='全部';goUser('orders')}],['待支付',userOrders.filter(o=>o.status==='待支付').length,()=>{App.orderTab='待支付';goUser('orders')}],['已完成',userOrders.filter(o=>o.status==='已完成').length,()=>{App.orderTab='已完成';goUser('orders')}],['收藏房源',favoriteSet.size,()=>goUser('favorites')]];
+  return `<div class="card pad"><div class="profile-head"><div class="avatar">${esc(u.avatar||u.name[0])}</div><div><h1 class="mb0">${esc(u.name)}</h1><p class="muted">用户名：${esc(u.username)} · 手机：${maskPhone(u.phone)} · 注册：${u.regTime}</p></div><button class="btn primary" onclick="showEditProfile()">编辑资料</button></div></div><section class="section stat-grid">${stats.map(s=>`<div class="stat" onclick="(${s[2]})()"><div class="label">${s[0]}</div><div class="num">${s[1]}</div><div class="sub">点击查看</div></div>`).join('')}</section><section class="section grid cols-3"><button class="mini-card" onclick="showToast('优惠券为占位展示，优惠由系统配置统一驱动','warn')"><b>🎟️ 优惠券</b><p class="muted">占位入口</p></button><button class="mini-card" onclick="showToast('联系客服为占位入口，当前不接入消息服务','warn')"><b>🎧 联系客服</b><p class="muted">占位入口</p></button><button class="mini-card" onclick="userLogout()"><b>🚪 退出登录</b><p class="muted">切换到游客状态</p></button></section>`;
+}
+function showEditProfile(){const u=getCurrentUser();showModal('编辑资料（原型）',`<div class="grid cols-2"><div class="field"><label>昵称</label><input id="editName" value="${esc(u.name)}"></div><div class="field"><label>备用手机号</label><input id="editPhone" value="${esc(u.phone)}"></div></div><div class="hint mt16">登录仍使用用户名+密码，手机号仅作为订单联系备用。</div>`,`<button class="btn ghost" onclick="closeModal()">取消</button><button class="btn primary" onclick="saveProfile()">保存</button>`)}
+function saveProfile(){const u=getCurrentUser();const phone=$('editPhone').value.trim();if(phone&&!/^1\d{10}$/.test(phone)){showToast('手机号格式不正确','err');return}u.name=$('editName').value.trim()||u.name;u.phone=phone;closeModal();showToast('资料已保存');render(false)}
+function renderFavorites(){
+  if(!ensureUserLogin()) return `<div class="empty">请先登录</div>`; const favs=houses.filter(h=>favoriteSet.has(h.id)); const p=paginate(favs,App.favPage,20); App.favPage=p.page;
+  return `<div class="page-title"><div><h1>我的收藏</h1><p>收藏/取消收藏实时更新，点击房源可查看详情或直接预约。</p></div><button class="btn ghost" onclick="goUser('houses')">去收藏更多</button></div><div class="house-grid">${p.items.length?p.items.map((h,i)=>houseCard(h,i)).join(''):`<div class="empty"><div class="big">♡</div>暂无收藏房源</div>`}</div>${paginationHtml('favorites',p.page,p.total)}`;
+}
+function showLoginModal(){showModal('用户登录 / 注册',`<div class="hint">演示账号：demo / 123456。注册仅需要用户名和密码，手机号不作为登录条件。</div><div class="grid mt16"><div class="field"><label>用户名</label><input id="loginUser" value="demo"></div><div class="field"><label>密码</label><input id="loginPass" type="password" value="123456"></div></div>`,`<button class="btn ghost" onclick="closeModal()">取消</button><button class="btn soft" onclick="registerUser()">快速注册</button><button class="btn primary" onclick="userLogin()">登录</button>`,'sm')}
+function userLogin(){const name=$('loginUser').value.trim();const pass=$('loginPass').value;const u=users.find(x=>x.username===name&&x.password===pass);if(!u){showToast('用户名或密码错误','err');return}if(u.status==='禁用'){showToast('账号已被禁用','err');return}App.currentUserId=u.id;App.userLogged=true;closeModal();showToast('登录成功');render(false)}
+function registerUser(){const name=$('loginUser').value.trim();const pass=$('loginPass').value;if(!name||!pass){showToast('用户名和密码不能为空','err');return}if(users.some(u=>u.username===name)){showToast('用户名已存在，可直接登录','warn');return}const u={id:users.length+1,username:name,password:pass,name:name,phone:'',avatar:name[0]||'新',status:'正常',regTime:today,orderCount:0};users.push(u);App.currentUserId=u.id;App.userLogged=true;closeModal();showToast('注册并登录成功');render(false)}
+function userLogout(){App.userLogged=false;showToast('已退出用户登录');goUser('home')}
+function renderAdminLogin(){return `<div class="login-wrap"><div class="login-card"><div class="brand"><div class="brand-mark">管</div><span>后台管理员登录</span></div><p class="muted">后台所有页面需要登录鉴权。单一管理员账号：admin / 123456。</p><div class="grid mt20"><div class="field"><label>用户名</label><input id="adminUser" value="admin"></div><div class="field"><label>密码</label><input id="adminPass" type="password" value="123456"></div><button class="btn primary full" onclick="adminLogin()">登录后台</button><button class="btn ghost full" onclick="fillAdminDemo()">填入演示账号</button></div></div></div>`}
+function fillAdminDemo(){$('adminUser').value='admin';$('adminPass').value='123456';showToast('已填入演示账号')}
+function adminLogin(){const u=$('adminUser').value.trim(),p=$('adminPass').value;if(u==='admin'&&p==='123456'){App.adminLogged=true;App.adminPage='dashboard';showToast('后台登录成功');render()}else showToast('后台账号或密码错误','err')}
+function adminLogout(){App.adminLogged=false;App.adminPage='login';showToast('已退出后台');render()}
+function paidRevenue(){return orders.filter(o=>o.paid&&['已预订','入住中','已完成','已评价'].includes(o.status)).reduce((s,o)=>s+o.amount,0)}
+function renderDashboard(){
+  const metrics=[['总房源数',houses.length,'全部房源','houses'],['今日订单',orders.filter(o=>o.createTime.startsWith(today)).length,'按创建日期统计','orders'],['待处理订单',orders.filter(o=>['待确认','退款中'].includes(o.status)).length,'待确认 + 退款中','orders-pending'],['总收入',money(paidRevenue()),'paid=true 且状态正常','orders-paid'],['上架房源',houses.filter(h=>h.status==='上架').length,'可在用户端展示','houses-online'],['平均评分',(houses.reduce((s,h)=>s+h.rating,0)/houses.length).toFixed(1),'房源均值','reviews'],['注册用户',users.length,'含禁用用户','users'],['收藏次数',favoriteSet.size,'实时统计','favorites']];
+  const trend=[2,5,3,7,4,6,3],days=['6/17','6/18','6/19','6/20','6/21','6/22','6/23'];
+  const pending=orders.filter(o=>['待确认','退款中'].includes(o.status));
+  return `<div class="page-title"><div><h1>数据看板</h1><p>展示核心运营指标、近7日订单趋势与待处理订单。</p></div><button class="btn primary" onclick="goAdmin('orders')">处理订单</button></div><section class="stat-grid">${metrics.map(m=>`<div class="stat" onclick="dashboardJump('${m[3]}')"><div class="label">${m[0]}</div><div class="num">${m[1]}</div><div class="sub">${m[2]}</div></div>`).join('')}</section><section class="section grid cols-2"><div><div class="section-head"><div><h2>近7日订单趋势</h2><p>柱状图可点击查看当日数据。</p></div></div><div class="chart">${trend.map((v,i)=>`<div class="bar" style="height:${v*24}px" onclick="showToast('${days[i]} 有 ${v} 个订单')"><b>${v}</b><span>${days[i]}</span></div>`).join('')}</div></div><div class="card pad"><div class="between"><h2>待处理订单</h2><button class="btn ghost small" onclick="dashboardJump('orders-pending')">查看全部</button></div><div class="list-stack mt12">${pending.length?pending.map(o=>`<div class="mini-card"><div class="between"><b>${o.orderNo}</b>${statusPill(o.status)}</div><p class="muted">${getHouse(o.houseId)?.name||'房源已删除'} · ${o.guestName}</p><div class="row right">${adminOrderActionButtons(o)}</div></div>`).join(''):'<div class="empty">暂无待处理订单</div>'}</div></div></section>`;
+}
+function dashboardJump(key){ if(key==='houses'){goAdmin('houses')} if(key==='houses-online'){App.adminFilters.houseStatus='上架';goAdmin('houses')} if(key==='orders'||key==='orders-paid'){goAdmin('orders')} if(key==='orders-pending'){App.adminFilters.orderStatus='待确认';goAdmin('orders')} if(key==='reviews'){goAdmin('reviews')} if(key==='users'){goAdmin('users')} if(key==='favorites'){switchMode('user');goUser('favorites')} }
+function renderAdminHouses(){
+  const kw=App.adminFilters.houseKeyword.toLowerCase(); let list=houses.filter(h=>(!kw||[h.name,h.city,h.host,h.address].join(' ').toLowerCase().includes(kw))&&(App.adminFilters.houseStatus==='全部'||h.status===App.adminFilters.houseStatus)); const p=paginate(list,App.adminPages.houses,20); App.adminPages.houses=p.page;
+  return `<div class="page-title"><div><h1>房源管理</h1><p>支持关键词/状态筛选，新增、编辑、上下架、删除，并跳转房态维护。</p></div><button class="btn primary" onclick="showHouseModal()">＋ 新增房源</button></div><div class="filter-panel"><div class="grid cols-4"><div class="field"><label>关键词</label><input id="adminHouseKw" value="${esc(App.adminFilters.houseKeyword)}" placeholder="名称/城市/房东/地址"></div><div class="field"><label>状态</label><select id="adminHouseStatus"><option>全部</option><option ${App.adminFilters.houseStatus==='上架'?'selected':''}>上架</option><option ${App.adminFilters.houseStatus==='下架'?'selected':''}>下架</option></select></div><div class="field"><label>&nbsp;</label><button class="btn primary" onclick="applyAdminHouseFilters()">筛选</button></div><div class="field"><label>&nbsp;</label><button class="btn ghost" onclick="App.adminFilters.houseKeyword='';App.adminFilters.houseStatus='全部';render(false)">重置</button></div></div></div><div class="table-wrap"><table><thead><tr><th>ID</th><th>房源</th><th>城市</th><th>价格</th><th>类型</th><th>容量</th><th>评分</th><th>状态</th><th>操作</th></tr></thead><tbody>${p.items.map(h=>`<tr><td>${h.id}</td><td><b>${h.name}</b><br><span class="muted">${h.host}</span></td><td>${h.city}</td><td>${money(h.price)}</td><td>${h.type}</td><td>${h.capacity}人</td><td>⭐ ${h.rating}</td><td><span class="tag ${h.status==='上架'?'green':'red'}">${h.status}</span></td><td><div class="row"><button class="btn blue small" onclick="showHouseModal(${h.id})">编辑</button><button class="btn ${h.status==='上架'?'amber':'green'} small" onclick="toggleHouseStatus(${h.id})">${h.status==='上架'?'下架':'上架'}</button><button class="btn purple small" onclick="goAvailability(${h.id})">房态</button><button class="btn red small" onclick="deleteHouse(${h.id})">删除</button></div></td></tr>`).join('')}</tbody></table></div>${paginationHtml('houses',p.page,p.total)}`;
+}
+function applyAdminHouseFilters(){App.adminFilters.houseKeyword=$('adminHouseKw').value.trim();App.adminFilters.houseStatus=$('adminHouseStatus').value;App.adminPages.houses=1;render(false)}
+function showHouseModal(id){
+  const isEdit=!!id; const h=isEdit?getHouse(id):{name:'',city:config.cities[0],price:399,cleanFee:50,type:'一居室',rooms:'1室1厅1卫',area:'55㎡',capacity:2,address:'',host:'',status:'上架',facilities:['WiFi','空调'],desc:'',rule:'',emoji:'🏡'};
+  showModal(isEdit?'编辑房源':'新增房源',`<div class="grid cols-2"><div class="field"><label>房源名称 *</label><input id="hName" value="${esc(h.name)}"></div><div class="field"><label>所在城市</label><select id="hCity">${config.cities.map(c=>`<option ${h.city===c?'selected':''}>${c}</option>`).join('')}</select></div><div class="field"><label>每晚价格</label><input id="hPrice" type="number" value="${h.price}"></div><div class="field"><label>清洁费</label><input id="hClean" type="number" value="${h.cleanFee}"></div><div class="field"><label>房源类型</label><select id="hType">${['单间','一居室','两居室','整套'].map(t=>`<option ${h.type===t?'selected':''}>${t}</option>`).join('')}</select></div><div class="field"><label>可住人数</label><input id="hCapacity" type="number" value="${h.capacity}"></div><div class="field"><label>房间数量</label><input id="hRooms" value="${esc(h.rooms)}"></div><div class="field"><label>面积</label><input id="hArea" value="${esc(h.area)}"></div><div class="field"><label>房东姓名 *</label><input id="hHost" value="${esc(h.host)}"></div><div class="field"><label>状态</label><select id="hStatus"><option ${h.status==='上架'?'selected':''}>上架</option><option ${h.status==='下架'?'selected':''}>下架</option></select></div></div><div class="field mt12"><label>详细地址 *</label><input id="hAddress" value="${esc(h.address)}"></div><div class="field mt12"><label>配套设施</label><div class="check-list">${config.tags.map(t=>`<label class="check-tag"><input type="checkbox" name="hFac" value="${t}" ${(h.facilities||[]).includes(t)?'checked':''}>${t}</label>`).join('')}</div></div><div class="grid cols-2 mt12"><div class="field"><label>房源介绍</label><textarea id="hDesc">${esc(h.desc)}</textarea></div><div class="field"><label>入住规则</label><textarea id="hRule">${esc(h.rule)}</textarea></div></div><label class="file-drop mt12"><input id="hCover" type="file" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="showToast('已选择封面图片：'+this.files[0]?.name)">🖼️ 点击上传真实封面图片（原型记录文件名）</label>`, `<button class="btn ghost" onclick="closeModal()">取消</button><button class="btn primary" onclick="saveHouse(${isEdit?id:'null'})">保存</button>`);
+}
+function saveHouse(id){const name=$('hName').value.trim(),address=$('hAddress').value.trim(),host=$('hHost').value.trim(); if(!name||!address||!host){showToast('房源名称、地址、房东姓名为必填','err');return} const fac=[...document.querySelectorAll('input[name="hFac"]:checked')].map(x=>x.value); const data={name,city:$('hCity').value,price:Number($('hPrice').value||0),cleanFee:Number($('hClean').value||0),type:$('hType').value,rooms:$('hRooms').value,area:$('hArea').value,capacity:Number($('hCapacity').value||1),address,host,status:$('hStatus').value,facilities:fac,desc:$('hDesc').value,rule:$('hRule').value}; if(id){Object.assign(getHouse(id),data);showToast('房源已更新')}else{houses.unshift({id:Math.max(...houses.map(h=>h.id))+1,...data,rating:4.8,sales:0,emoji:'🏡'});showToast('房源已新增')} closeModal();render(false)}
+function toggleHouseStatus(id){const h=getHouse(id);h.status=h.status==='上架'?'下架':'上架';showToast(`已${h.status}`);render(false)}
+function deleteHouse(id){confirmAction('确认删除该房源？删除后将同步清除收藏记录；历史订单展示“房源已删除”。',()=>{const idx=houses.findIndex(h=>h.id===id);if(idx>=0)houses.splice(idx,1);favoriteSet.delete(id);showToast('房源已删除');render(false)})}
+function goAvailability(id){App.adminHouseId=id;App.adminPage='availability';render()}
+function renderAvailability(){
+  const h=getHouse(App.adminHouseId)||houses[0]; App.adminHouseId=h.id; const [y,m]=App.adminMonth.split('-').map(Number); const first=new Date(y,m-1,1); const startBlank=first.getDay(); const days=new Date(y,m,0).getDate(); let cells=[]; for(let i=0;i<startBlank;i++)cells.push('<div class="day-cell blank"></div>'); for(let d=1;d<=days;d++){const date=`${App.adminMonth}-${String(d).padStart(2,'0')}`;const st=getDateStatus(h.id,date);cells.push(`<div class="day-cell ${st==='锁定'?'locked':st==='已订'?'booked':''}" onclick="toggleDateState(${h.id},'${date}')"><div class="day-num">${d}</div><div class="day-status">${st}</div>${st==='已订'?`<small class="muted">${getBookedOrder(h.id,date)?.orderNo||''}</small>`:''}</div>`)}
+  return `<div class="page-title"><div><h1>房态维护</h1><p>点击日期切换“可订/锁定”；已订日期由订单占用自动标记，不可手动修改。</p></div><button class="btn ghost" onclick="goAdmin('houses')">返回房源管理</button></div><div class="filter-panel"><div class="grid cols-4"><div class="field"><label>选择房源</label><select id="availHouse" onchange="App.adminHouseId=Number(this.value);render(false)">${houses.map(x=>`<option value="${x.id}" ${x.id===h.id?'selected':''}>${x.name}</option>`).join('')}</select></div><div class="field"><label>月份</label><input id="availMonth" type="month" value="${App.adminMonth}" onchange="App.adminMonth=this.value;render(false)"></div><div class="field"><label>&nbsp;</label><button class="btn ghost" onclick="changeMonth(-1)">上月</button></div><div class="field"><label>&nbsp;</label><button class="btn ghost" onclick="changeMonth(1)">下月</button></div></div></div><div class="card pad"><div class="between"><h2>${h.name} · ${App.adminMonth}</h2><div class="tags"><span class="tag green">可订</span><span class="tag amber">锁定</span><span class="tag red">已订</span></div></div><div class="calendar-grid mt16">${['日','一','二','三','四','五','六'].map(w=>`<div class="weekday">${w}</div>`).join('')}${cells.join('')}</div></div>`;
+}
+function changeMonth(delta){let [y,m]=App.adminMonth.split('-').map(Number);m+=delta;while(m<1){m+=12;y--}while(m>12){m-=12;y++}App.adminMonth=y+'-'+String(m).padStart(2,'0');render(false)}
+function toggleDateState(hid,date){const st=getDateStatus(hid,date); if(st==='已订'){showToast('已订日期不能直接修改','warn');return} availabilityLocks[hid]=availabilityLocks[hid]||[]; if(st==='锁定'){availabilityLocks[hid]=availabilityLocks[hid].filter(d=>d!==date);showToast(date+' 已恢复可订')}else{availabilityLocks[hid].push(date);showToast(date+' 已锁定')} render(false)}
+function renderAdminOrders(){
+  const f=App.adminFilters; let list=orders.filter(o=>{const h=getHouse(o.houseId),u=getUser(o.userId);return (!f.orderKeyword||o.orderNo.includes(f.orderKeyword))&&(!f.orderHouse||((h?.name||'').includes(f.orderHouse)))&&(!f.orderUser||((u?.name||o.guestName).includes(f.orderUser)||o.guestName.includes(f.orderUser)))&&(!f.orderPhone||o.phone.includes(f.orderPhone))&&(f.orderStatus==='全部'||o.status===f.orderStatus)}); const p=paginate(list,App.adminPages.orders,20); App.adminPages.orders=p.page;
+  return `<div class="page-title"><div><h1>订单管理</h1><p>支持订单号、房源、用户、手机号、状态多维筛选与状态流转。</p></div><button class="btn ghost" onclick="App.adminFilters.orderStatus='全部';render(false)">查看全部</button></div><div class="filter-panel"><div class="grid cols-4"><div class="field"><label>订单号</label><input id="admOrderNo" value="${esc(f.orderKeyword)}"></div><div class="field"><label>房源</label><input id="admOrderHouse" value="${esc(f.orderHouse)}"></div><div class="field"><label>用户</label><input id="admOrderUser" value="${esc(f.orderUser)}"></div><div class="field"><label>手机号</label><input id="admOrderPhone" value="${esc(f.orderPhone)}"></div><div class="field"><label>状态</label><select id="admOrderStatus">${adminStatusTabs.map(s=>`<option ${f.orderStatus===s?'selected':''}>${s}</option>`).join('')}</select></div><div class="field"><label>&nbsp;</label><button class="btn primary" onclick="applyAdminOrderFilters()">筛选订单</button></div><div class="field"><label>&nbsp;</label><button class="btn ghost" onclick="resetAdminOrderFilters()">重置</button></div></div></div><div class="table-wrap"><table><thead><tr><th>订单号</th><th>房源/用户</th><th>入住</th><th>金额</th><th>支付</th><th>状态</th><th>操作</th></tr></thead><tbody>${p.items.map(o=>`<tr><td><b>${o.orderNo}</b><br><span class="muted">${o.createTime}</span></td><td>${getHouse(o.houseId)?.name||'房源已删除'}<br><span class="muted">${o.guestName} · ${maskPhone(o.phone)}</span></td><td>${o.checkIn} 至 ${o.checkOut}<br><span class="muted">${o.nights}晚 ${o.guests}人</span></td><td>${money(o.amount)}</td><td><span class="tag ${o.paid?'green':'gray'}">${o.paid?'已支付':'未支付'}</span></td><td>${statusPill(o.status)}</td><td><div class="row"><button class="btn ghost small" onclick="showAdminOrderDetail('${o.orderNo}')">详情</button>${adminOrderActionButtons(o)}</div></td></tr>`).join('')}</tbody></table></div>${paginationHtml('adminOrders',p.page,p.total)}`;
+}
+function applyAdminOrderFilters(){const f=App.adminFilters;f.orderKeyword=$('admOrderNo').value.trim();f.orderHouse=$('admOrderHouse').value.trim();f.orderUser=$('admOrderUser').value.trim();f.orderPhone=$('admOrderPhone').value.trim();f.orderStatus=$('admOrderStatus').value;App.adminPages.orders=1;render(false)}
+function resetAdminOrderFilters(){Object.assign(App.adminFilters,{orderKeyword:'',orderHouse:'',orderUser:'',orderPhone:'',orderStatus:'全部'});render(false)}
+function adminOrderActionButtons(o){let b=''; if(o.status==='待确认') b+=`<button class="btn green small" onclick="adminSetOrder('${o.orderNo}','待支付',false)">确认</button><button class="btn red small" onclick="adminSetOrder('${o.orderNo}','已取消',false)">拒绝</button>`; if(o.status==='待支付') b+=`<button class="btn red small" onclick="adminSetOrder('${o.orderNo}','已取消',false)">取消</button>`; if(o.status==='已预订') b+=`<button class="btn blue small" onclick="adminSetOrder('${o.orderNo}','入住中',true)">办理入住</button><button class="btn amber small" onclick="adminSetOrder('${o.orderNo}','退款中',true)">退款申请</button>`; if(o.status==='入住中') b+=`<button class="btn green small" onclick="adminSetOrder('${o.orderNo}','已完成',true)">完成</button>`; if(o.status==='退款中') b+=`<button class="btn red small" onclick="adminSetOrder('${o.orderNo}','已退款',false)">同意退款</button><button class="btn green small" onclick="adminSetOrder('${o.orderNo}','已预订',true)">拒绝退款</button>`; return b}
+function adminSetOrder(no,status,paid){confirmAction(`确认将订单 ${no} 变更为“${status}”？`,()=>{const o=getOrder(no);if(o){o.status=status;o.paid=paid;showToast('订单状态已更新');render(false)}})}
+function showAdminOrderDetail(no){const o=getOrder(no),h=getHouse(o.houseId),u=getUser(o.userId);showModal('订单详情',`<div class="grid cols-2"><div><div class="kv"><b>订单号</b><span>${o.orderNo}</span></div><div class="kv"><b>状态</b><span>${statusPill(o.status)}</span></div><div class="kv"><b>用户</b><span>${u?.name||o.guestName}</span></div><div class="kv"><b>手机号</b><span>${maskPhone(o.phone)}</span></div></div><div><div class="kv"><b>房源</b><span>${h?.name||'房源已删除'}</span></div><div class="kv"><b>入住</b><span>${o.checkIn} 至 ${o.checkOut}</span></div><div class="kv"><b>金额</b><span>${money(o.amount)}</span></div><div class="kv"><b>备注</b><span>${esc(o.note||'无')}</span></div></div></div>`, `<button class="btn ghost" onclick="closeModal()">关闭</button>`)}
+function renderAdminReviews(){
+  let list=reviews.filter(r=>App.adminFilters.reviewStatus==='全部'||r.status===App.adminFilters.reviewStatus); const p=paginate(list,App.adminPages.reviews,20); App.adminPages.reviews=p.page;
+  return `<div class="page-title"><div><h1>评价管理</h1><p>支持状态筛选、回复评价、显示/隐藏切换与删除。</p></div></div><div class="filter-panel"><div class="grid cols-4"><div class="field"><label>状态</label><select id="reviewStatus"><option>全部</option><option ${App.adminFilters.reviewStatus==='显示'?'selected':''}>显示</option><option ${App.adminFilters.reviewStatus==='隐藏'?'selected':''}>隐藏</option></select></div><div class="field"><label>&nbsp;</label><button class="btn primary" onclick="App.adminFilters.reviewStatus=$('reviewStatus').value;App.adminPages.reviews=1;render(false)">筛选</button></div></div></div><div class="table-wrap"><table><thead><tr><th>ID</th><th>房源/订单</th><th>用户</th><th>评分</th><th>内容</th><th>状态</th><th>操作</th></tr></thead><tbody>${p.items.map(r=>`<tr><td>${r.id}</td><td>${getHouse(r.houseId)?.name||'房源已删除'}<br><span class="muted">${r.orderNo}</span></td><td>${r.userName}</td><td>⭐ ${r.rating}</td><td style="max-width:260px">${esc(r.content)}${r.reply?`<br><span class="muted">回复：${esc(r.reply)}</span>`:''}</td><td><span class="tag ${r.status==='显示'?'green':'gray'}">${r.status}</span></td><td><div class="row"><button class="btn blue small" onclick="replyReview(${r.id})">回复</button><button class="btn amber small" onclick="toggleReviewStatus(${r.id})">${r.status==='显示'?'隐藏':'显示'}</button><button class="btn red small" onclick="deleteReview(${r.id})">删除</button></div></td></tr>`).join('')}</tbody></table></div>${paginationHtml('reviews',p.page,p.total)}`;
+}
+function replyReview(id){const r=reviews.find(x=>x.id===id);showModal('回复评价',`<div class="hint">${esc(r.content)}</div><div class="field mt16"><label>回复内容</label><textarea id="reviewReply">${esc(r.reply||'')}</textarea></div>`,`<button class="btn ghost" onclick="closeModal()">取消</button><button class="btn primary" onclick="saveReviewReply(${id})">保存回复</button>`)}
+function saveReviewReply(id){const r=reviews.find(x=>x.id===id);r.reply=$('reviewReply').value.trim();r.replyTime=today+' 12:00';closeModal();showToast('评价回复已保存');render(false)}
+function toggleReviewStatus(id){const r=reviews.find(x=>x.id===id);r.status=r.status==='显示'?'隐藏':'显示';recalcHouseRating(r.houseId);showToast('评价状态已切换');render(false)}
+function deleteReview(id){confirmAction('确认删除该评价？删除后需要重新计算房源评分。',()=>{const r=reviews.find(x=>x.id===id);reviews=reviews.filter(x=>x.id!==id);if(r)recalcHouseRating(r.houseId);showToast('评价已删除');render(false)})}
+function renderAdminUsers(){
+  const kw=App.adminFilters.userKeyword.toLowerCase(); let list=users.filter(u=>!kw||[u.username,u.name,u.phone,String(u.id)].join(' ').toLowerCase().includes(kw)); const p=paginate(list,App.adminPages.users,20); App.adminPages.users=p.page;
+  return `<div class="page-title"><div><h1>用户管理</h1><p>支持用户名、手机号、ID搜索，查看用户信息，禁用/启用用户。</p></div></div><div class="filter-panel"><div class="grid cols-4"><div class="field"><label>关键词</label><input id="userKw" value="${esc(App.adminFilters.userKeyword)}" placeholder="用户名/手机号/ID"></div><div class="field"><label>&nbsp;</label><button class="btn primary" onclick="App.adminFilters.userKeyword=$('userKw').value.trim();App.adminPages.users=1;render(false)">搜索</button></div><div class="field"><label>&nbsp;</label><button class="btn ghost" onclick="App.adminFilters.userKeyword='';render(false)">重置</button></div></div></div><div class="table-wrap"><table><thead><tr><th>ID</th><th>用户</th><th>手机号</th><th>注册时间</th><th>订单数</th><th>状态</th><th>操作</th></tr></thead><tbody>${p.items.map(u=>`<tr><td>${u.id}</td><td><b>${u.name}</b><br><span class="muted">${u.username}</span></td><td>${maskPhone(u.phone)}</td><td>${u.regTime}</td><td>${orders.filter(o=>o.userId===u.id).length}</td><td><span class="tag ${u.status==='正常'?'green':'red'}">${u.status}</span></td><td><div class="row"><button class="btn ghost small" onclick="showUserDetail(${u.id})">查看</button><button class="btn ${u.status==='正常'?'red':'green'} small" onclick="toggleUser(${u.id})">${u.status==='正常'?'禁用':'启用'}</button></div></td></tr>`).join('')}</tbody></table></div>${paginationHtml('users',p.page,p.total)}`;
+}
+function showUserDetail(id){const u=getUser(id);showModal('用户信息',`<div class="profile-head"><div class="avatar">${esc(u.avatar)}</div><div><h2>${esc(u.name)}</h2><p class="muted">${esc(u.username)} · ${maskPhone(u.phone)}</p></div></div><div class="grid cols-2 mt16"><div class="kv"><b>ID</b><span>${u.id}</span></div><div class="kv"><b>状态</b><span>${u.status}</span></div><div class="kv"><b>注册时间</b><span>${u.regTime}</span></div><div class="kv"><b>订单数</b><span>${orders.filter(o=>o.userId===u.id).length}</span></div></div>`, `<button class="btn ghost" onclick="closeModal()">关闭</button>`)}
+function toggleUser(id){const u=getUser(id);confirmAction(`确认${u.status==='正常'?'禁用':'启用'}用户 ${u.name}？`,()=>{u.status=u.status==='正常'?'禁用':'正常';showToast('用户状态已更新');render(false)})}
+function renderConfig(){return `<div class="page-title"><div><h1>系统配置</h1><p>维护城市、设施标签和平台规则参数。</p></div><button class="btn primary" onclick="saveRules()">保存规则</button></div><div class="grid cols-2"><section class="card pad"><div class="between"><h2>城市管理</h2><button class="btn ghost small" onclick="addCity()">新增城市</button></div><div class="field mt12"><label>城市名称</label><input id="newCity" placeholder="如：重庆"></div><div class="tags mt16">${config.cities.map(c=>`<span class="tag brand">${c} <button class="pill-link" onclick="deleteCity('${c}')">×</button></span>`).join('')}</div></section><section class="card pad"><div class="between"><h2>设施标签管理</h2><button class="btn ghost small" onclick="addTag()">新增标签</button></div><div class="field mt12"><label>标签名称</label><input id="newTag" placeholder="如：泳池"></div><div class="tags mt16">${config.tags.map(t=>`<span class="tag">${t} <button class="pill-link" onclick="deleteTag('${t}')">×</button></span>`).join('')}</div></section></div><section class="section card pad"><h2>平台规则设置</h2><div class="grid cols-4 mt16"><div class="field"><label>默认优惠金额（元）</label><input id="cfgDiscount" type="number" value="${config.defaultDiscount}"></div><div class="field"><label>待支付超时（分钟）</label><input id="cfgPay" type="number" value="${config.payTimeout}"></div><div class="field"><label>最晚免费取消（小时）</label><input id="cfgCancel" type="number" value="${config.freeCancelHours}"></div><div class="field"><label>评价入口保留（天）</label><input id="cfgReview" type="number" value="${config.reviewDays}"></div></div><div class="hint mt16">默认配置：优惠30元、待支付超时30分钟、入住前24小时免费取消、离店后30天保留评价入口。</div></section>`}
+function addCity(){const v=$('newCity').value.trim();if(!v){showToast('请输入城市名称','err');return}if(config.cities.includes(v)){showToast('城市已存在','warn');return}config.cities.push(v);showToast('城市已新增');render(false)}
+function deleteCity(c){confirmAction('确认删除城市 '+c+'？',()=>{config.cities=config.cities.filter(x=>x!==c);showToast('城市已删除');render(false)})}
+function addTag(){const v=$('newTag').value.trim();if(!v){showToast('请输入标签名称','err');return}if(config.tags.includes(v)){showToast('标签已存在','warn');return}config.tags.push(v);showToast('标签已新增');render(false)}
+function deleteTag(t){confirmAction('确认删除设施标签 '+t+'？',()=>{config.tags=config.tags.filter(x=>x!==t);houses.forEach(h=>h.facilities=h.facilities.filter(x=>x!==t));showToast('标签已删除');render(false)})}
+function saveRules(){config.defaultDiscount=Number($('cfgDiscount').value||0);config.payTimeout=Number($('cfgPay').value||30);config.freeCancelHours=Number($('cfgCancel').value||24);config.reviewDays=Number($('cfgReview').value||30);showToast('系统配置已保存');render(false)}
+render(false);
+</script>
+</body>
+</html>

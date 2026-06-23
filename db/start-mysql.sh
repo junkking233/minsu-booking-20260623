@@ -5,7 +5,7 @@
 
 set -e
 
-DATABASE_NAME="template_db"
+DATABASE_NAME="minsu_db"
 MYSQL_ROOT_PASSWORD="admin123"
 PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 DB_SQL="${PROJECT_ROOT}/db/db.sql"

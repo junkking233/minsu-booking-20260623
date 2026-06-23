@@ -7,16 +7,32 @@ export interface LoginResponse {
   expiresAt: number;
 }
 
+export interface RegisterResponse {
+  id: number;
+  username: string;
+  name: string;
+  role: string;
+  status: number;
+}
+
 export const authApi = {
   login(data: { username: string; password: string }): Promise<LoginResponse> {
-    return http.post<never, LoginResponse>('/auth/login', data);
+    return http.post<LoginResponse>('/auth/login', data);
+  },
+
+  register(data: { username: string; password: string; name?: string }): Promise<RegisterResponse> {
+    return http.post<RegisterResponse>('/auth/register', data);
   },
 
   me(): Promise<AuthUser> {
-    return http.get<never, AuthUser>('/auth/me');
+    return http.get<AuthUser>('/auth/me');
   },
 
   changePassword(data: { oldPassword: string; newPassword: string }): Promise<void> {
-    return http.put<never, void>('/auth/password', data);
+    return http.put<void>('/auth/password', data);
+  },
+
+  updateProfile(data: { name?: string; phone?: string; avatar?: string }): Promise<AuthUser> {
+    return http.put<AuthUser>('/auth/profile', data);
   },
 };

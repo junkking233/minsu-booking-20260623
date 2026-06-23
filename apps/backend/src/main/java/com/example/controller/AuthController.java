@@ -5,6 +5,8 @@ import com.example.dto.AuthUserDto;
 import com.example.dto.ChangePasswordRequest;
 import com.example.dto.LoginRequest;
 import com.example.dto.LoginResponse;
+import com.example.dto.ProfileUpdateRequest;
+import com.example.dto.RegisterRequest;
 import com.example.exception.BusinessException;
 import com.example.service.AuthService;
 import com.example.util.TokenSubject;
@@ -27,6 +29,11 @@ public class AuthController {
         return Result.ok("登录成功", authService.login(request));
     }
 
+    @PostMapping("/register")
+    public Result<AuthUserDto> register(@Valid @RequestBody RegisterRequest request) {
+        return Result.ok("注册成功", authService.register(request));
+    }
+
     @GetMapping("/me")
     public Result<AuthUserDto> me(HttpServletRequest request) {
         return Result.ok(authService.getCurrentUser(currentUser(request).getUserId()));
@@ -36,6 +43,11 @@ public class AuthController {
     public Result<Void> changePassword(@Valid @RequestBody ChangePasswordRequest request, HttpServletRequest httpRequest) {
         authService.changePassword(currentUser(httpRequest).getUserId(), request);
         return Result.ok("密码修改成功", null);
+    }
+
+    @PutMapping("/profile")
+    public Result<AuthUserDto> updateProfile(@RequestBody ProfileUpdateRequest request, HttpServletRequest httpRequest) {
+        return Result.ok("更新成功", authService.updateProfile(currentUser(httpRequest).getUserId(), request));
     }
 
     private TokenSubject currentUser(HttpServletRequest request) {

@@ -5,6 +5,8 @@ import com.example.dto.AuthUserDto;
 import com.example.dto.ChangePasswordRequest;
 import com.example.dto.LoginRequest;
 import com.example.dto.LoginResponse;
+import com.example.dto.ProfileUpdateRequest;
+import com.example.dto.RegisterRequest;
 import com.example.entity.User;
 import com.example.exception.BusinessException;
 import com.example.mapper.UserMapper;
@@ -12,6 +14,7 @@ import com.example.service.AuthService;
 import com.example.util.PasswordUtils;
 import com.example.util.TokenUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -41,6 +44,24 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    public AuthUserDto register(RegisterRequest request) {
+        User exist = userMapper.selectOne(new QueryWrapper<User>().eq("username", request.getUsername()));
+        if (exist != null) {
+            throw new BusinessException(409, "用户名已存在");
+        }
+
+        User user = new User();
+        user.setUsername(request.getUsername());
+        user.setPassword(PasswordUtils.md5(request.getPassword()));
+        user.setName(StringUtils.hasText(request.getName()) ? request.getName() : request.getUsername());
+        user.setRole("USER");
+        user.setStatus(1);
+        userMapper.insert(user);
+
+        return AuthUserDto.from(user);
+    }
+
+    @Override
     public AuthUserDto getCurrentUser(Long userId) {
         User user = userMapper.selectById(userId);
         if (user == null || user.getStatus() == null || user.getStatus() != 1) {
@@ -63,5 +84,26 @@ public class AuthServiceImpl implements AuthService {
         update.setId(userId);
         update.setPassword(PasswordUtils.md5(request.getNewPassword()));
         userMapper.updateById(update);
+    }
+
+    @Override
+    public AuthUserDto updateProfile(Long userId, ProfileUpdateRequest request) {
+        User user = userMapper.selectById(userId);
+        if (user == null) {
+            throw new BusinessException(404, "用户不存在");
+        }
+
+        if (request.getName() != null) {
+            user.setName(request.getName());
+        }
+        if (request.getPhone() != null) {
+            user.setPhone(request.getPhone());
+        }
+        if (request.getAvatar() != null) {
+            user.setAvatar(request.getAvatar());
+        }
+        userMapper.updateById(user);
+
+        return AuthUserDto.from(userMapper.selectById(userId));
     }
 }

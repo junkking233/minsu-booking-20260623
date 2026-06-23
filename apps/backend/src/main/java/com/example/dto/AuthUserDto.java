@@ -8,7 +8,11 @@ public class AuthUserDto {
 
     private String username;
 
-    private String email;
+    private String name;
+
+    private String phone;
+
+    private String avatar;
 
     private String role;
 
@@ -18,7 +22,9 @@ public class AuthUserDto {
         AuthUserDto dto = new AuthUserDto();
         dto.setId(user.getId());
         dto.setUsername(user.getUsername());
-        dto.setEmail(user.getEmail());
+        dto.setName(user.getName());
+        dto.setPhone(user.getPhone());
+        dto.setAvatar(user.getAvatar());
         dto.setRole(user.getRole());
         dto.setStatus(user.getStatus());
         return dto;
@@ -40,12 +46,28 @@ public class AuthUserDto {
         this.username = username;
     }
 
-    public String getEmail() {
-        return email;
+    public String getName() {
+        return name;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
     }
 
     public String getRole() {

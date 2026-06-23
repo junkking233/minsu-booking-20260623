@@ -1,16 +1,32 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { MessageBox, Search, User } from '@element-plus/icons-vue';
+import { ArrowDown, User } from '@element-plus/icons-vue';
+import { clearAuthState, getCurrentUser } from '@/utils/auth';
 
 const route = useRoute();
 const router = useRouter();
+const currentUser = getCurrentUser();
 
 const navItems = [
   { label: '首页', path: '/portal/home' },
-  { label: '服务大厅', path: '/portal/services' },
-  { label: '我的业务', path: '/portal/my-business' },
-  { label: '个人中心', path: '/portal/profile' },
+  { label: '房源列表', path: '/portal/houses' },
+  { label: '我的订单', path: '/portal/orders' },
+  { label: '我的收藏', path: '/portal/favorites' },
 ];
+
+const activeMenu = computed(() => {
+  if (route.path.startsWith('/portal/home')) return '/portal/home';
+  if (route.path.startsWith('/portal/houses')) return '/portal/houses';
+  if (route.path.startsWith('/portal/orders')) return '/portal/orders';
+  if (route.path.startsWith('/portal/favorites')) return '/portal/favorites';
+  return '/portal/home';
+});
+
+function logout() {
+  clearAuthState();
+  router.push('/login');
+}
 </script>
 
 <template>
@@ -25,32 +41,40 @@ const navItems = [
               <path d="M12 28V14l8 7 8-7v14" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
               <defs>
                 <linearGradient id="portalGrad" x1="0" y1="0" x2="40" y2="40">
-                  <stop stop-color="#0d9488" />
-                  <stop offset="1" stop-color="#3b82f6" />
+                  <stop stop-color="#0ea5e9" />
+                  <stop offset="1" stop-color="#2563eb" />
                 </linearGradient>
               </defs>
             </svg>
           </div>
-          <div class="brand-text">
-            <div class="brand-title">智享门户</div>
-            <div class="brand-subtitle">Smart Portal</div>
-          </div>
+          <span class="brand-text">民宿预约</span>
         </div>
 
-        <el-menu :default-active="route.path" mode="horizontal" class="portal-menu" router>
+        <el-menu :default-active="activeMenu" mode="horizontal" class="portal-menu" router>
           <el-menu-item v-for="item in navItems" :key="item.path" :index="item.path">
             {{ item.label }}
           </el-menu-item>
         </el-menu>
 
         <div class="header-actions">
-          <el-tooltip content="搜索" placement="bottom">
-            <el-button :icon="Search" circle class="action-btn" />
-          </el-tooltip>
-          <el-tooltip content="消息" placement="bottom">
-            <el-button :icon="MessageBox" circle class="action-btn" />
-          </el-tooltip>
-          <el-button type="primary" :icon="User" class="login-btn" @click="router.push('/login')">
+          <template v-if="currentUser">
+            <el-dropdown trigger="click" @command="(cmd: string) => { if (cmd === 'profile') router.push('/portal/profile'); else if (cmd === 'logout') logout(); }">
+              <span class="user-badge">
+                <el-avatar :size="32" class="user-avatar">
+                  <el-icon><User /></el-icon>
+                </el-avatar>
+                <span class="user-name">{{ currentUser.name || currentUser.username }}</span>
+                <el-icon class="user-arrow"><ArrowDown /></el-icon>
+              </span>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item command="profile">个人中心</el-dropdown-item>
+                  <el-dropdown-item command="logout" divided>退出登录</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+          </template>
+          <el-button v-else type="primary" class="login-btn" @click="router.push('/login')">
             登录
           </el-button>
         </div>
@@ -69,16 +93,29 @@ const navItems = [
     <!-- 页脚 -->
     <footer class="portal-footer">
       <div class="footer-inner">
-        <div class="footer-left">
-          <span class="footer-brand">智享门户</span>
-          <span class="footer-divider">|</span>
-          <span>一站式服务平台</span>
-        </div>
-        <div class="footer-right">
-          <span>技术支持：Fullstack App Starter</span>
-        </div>
+        <span>&copy; 2026 民宿预约管理系统</span>
       </div>
     </footer>
+
+    <!-- 移动端底部 Tab 栏 -->
+    <div class="mobile-tabs">
+      <div
+        v-for="item in navItems"
+        :key="item.path"
+        class="mobile-tab"
+        :class="{ active: activeMenu === item.path }"
+        @click="router.push(item.path)"
+      >
+        <span>{{ item.label }}</span>
+      </div>
+      <div
+        class="mobile-tab"
+        :class="{ active: route.path === '/portal/profile' }"
+        @click="currentUser ? router.push('/portal/profile') : router.push('/login')"
+      >
+        <span>{{ currentUser ? '我的' : '登录' }}</span>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -88,9 +125,10 @@ const navItems = [
   min-height: 100vh;
   flex-direction: column;
   background:
-    radial-gradient(ellipse 80% 60% at 10% 0%, rgb(13 148 136 / 6%), transparent),
-    radial-gradient(ellipse 60% 50% at 90% 100%, rgb(59 130 246 / 5%), transparent),
+    radial-gradient(ellipse 80% 60% at 10% 0%, rgb(14 165 233 / 6%), transparent),
+    radial-gradient(ellipse 60% 50% at 90% 100%, rgb(37 99 235 / 5%), transparent),
     var(--c-bg);
+  padding-bottom: 70px;
 }
 
 /* Header */
@@ -98,7 +136,7 @@ const navItems = [
   position: sticky;
   z-index: 50;
   top: 0;
-  background: rgb(255 255 255 / 80%);
+  background: rgb(255 255 255 / 85%);
   border-bottom: 1px solid var(--c-line);
   backdrop-filter: blur(20px) saturate(1.8);
   -webkit-backdrop-filter: blur(20px) saturate(1.8);
@@ -111,15 +149,16 @@ const navItems = [
   max-width: 1280px;
   margin: 0 auto;
   padding: 0 28px;
-  min-height: 68px;
+  min-height: 64px;
 }
 
 .brand {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   cursor: pointer;
   transition: opacity var(--transition-fast);
+  flex-shrink: 0;
 }
 
 .brand:hover {
@@ -127,36 +166,27 @@ const navItems = [
 }
 
 .brand-mark {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
 }
 
 .brand-mark svg {
   width: 100%;
   height: 100%;
-  filter: drop-shadow(0 2px 4px rgb(13 148 136 / 25%));
+  filter: drop-shadow(0 2px 4px rgb(14 165 233 / 30%));
 }
 
-.brand-title {
-  font-size: 18px;
+.brand-text {
+  font-size: 20px;
   font-weight: 700;
-  letter-spacing: -0.3px;
   color: var(--c-ink);
-}
-
-.brand-subtitle {
-  margin-top: 1px;
-  color: var(--c-muted-light);
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
+  letter-spacing: -0.5px;
 }
 
 .portal-menu {
   flex: 1 1 auto;
   min-width: 0;
-  max-width: 480px;
+  max-width: 520px;
   margin: 0 20px;
   border-bottom: 0;
   justify-content: center;
@@ -169,7 +199,6 @@ const navItems = [
   font-weight: 500;
   color: var(--c-body);
   border-bottom-width: 2.5px;
-  transition: all var(--transition-fast);
 }
 
 .portal-menu :deep(.el-menu-item:hover) {
@@ -184,18 +213,38 @@ const navItems = [
   flex-shrink: 0;
 }
 
-.action-btn {
-  color: var(--c-muted);
-  background: var(--c-line-light);
-  border: 1px solid var(--c-line);
-  transition: all var(--transition-fast);
+.user-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px 4px 4px;
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  transition: background var(--transition-fast);
 }
 
-.action-btn:hover {
-  color: var(--c-primary);
-  background: var(--c-primary-bg);
-  border-color: rgb(13 148 136 / 20%);
-  transform: translateY(-1px);
+.user-badge:hover {
+  background: var(--c-line-light);
+}
+
+.user-avatar {
+  background: linear-gradient(135deg, var(--c-primary), var(--c-primary-dark));
+  color: #fff;
+}
+
+.user-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--c-ink-light);
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-arrow {
+  font-size: 12px;
+  color: var(--c-muted);
 }
 
 .login-btn {
@@ -212,29 +261,17 @@ const navItems = [
 
 /* Footer */
 .portal-footer {
-  padding: 20px 28px;
+  padding: 18px 28px;
   background: var(--c-surface);
   border-top: 1px solid var(--c-line);
 }
 
 .footer-inner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   max-width: 1280px;
   margin: 0 auto;
+  text-align: center;
   color: var(--c-muted);
   font-size: 13px;
-}
-
-.footer-brand {
-  font-weight: 700;
-  color: var(--c-ink-light);
-}
-
-.footer-divider {
-  margin: 0 8px;
-  color: var(--c-line);
 }
 
 /* Page transition */
@@ -253,31 +290,62 @@ const navItems = [
   transform: translateY(-8px);
 }
 
-/* Responsive */
-@media (max-width: 860px) {
+/* Mobile tabs */
+.mobile-tabs {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  background: var(--c-surface);
+  border-top: 1px solid var(--c-line);
+  padding: 6px 0 env(safe-area-inset-bottom);
+}
+
+.mobile-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 6px 0;
+  font-size: 11px;
+  color: var(--c-muted);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.mobile-tab.active {
+  color: var(--c-primary);
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
   .header-inner {
-    flex-wrap: wrap;
     padding: 10px 16px;
-    gap: 6px;
-    min-height: auto;
+    min-height: 52px;
+  }
+
+  .brand-text {
+    font-size: 17px;
   }
 
   .portal-menu {
-    order: 3;
-    width: 100%;
-    max-width: none;
-    margin: 0;
-    overflow-x: auto;
+    display: none;
   }
 
-  .portal-menu :deep(.el-menu--horizontal) {
-    justify-content: center;
+  .portal-layout {
+    padding-bottom: 70px;
   }
 
-  .footer-inner {
-    flex-direction: column;
-    gap: 6px;
-    text-align: center;
+  .mobile-tabs {
+    display: flex;
+  }
+
+  .portal-footer {
+    display: none;
   }
 }
 </style>

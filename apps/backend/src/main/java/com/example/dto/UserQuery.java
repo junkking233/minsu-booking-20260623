@@ -1,13 +1,11 @@
 package com.example.dto;
 
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 
 public class UserQuery {
 
-    private String username;
-
-    private String email;
+    private String keyword;
 
     private Integer status;
 
@@ -18,20 +16,12 @@ public class UserQuery {
     @Max(value = 100, message = "每页数量不能超过100")
     private Integer pageSize = 10;
 
-    public String getUsername() {
-        return username;
+    public String getKeyword() {
+        return keyword;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
+    public void setKeyword(String keyword) {
+        this.keyword = keyword;
     }
 
     public Integer getStatus() {

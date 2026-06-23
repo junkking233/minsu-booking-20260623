@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.OrderMapper">
+
+    <select id="searchOrders" resultType="com.example.entity.Order">
+        SELECT o.* FROM t_order o
+        LEFT JOIN t_house h ON o.house_id = h.id
+        <where>
+            <if test="query.keyword != null and query.keyword != ''">
+                AND (o.order_no LIKE CONCAT('%', #{query.keyword}, '%')
+                     OR h.name LIKE CONCAT('%', #{query.keyword}, '%')
+                     OR o.guest_name LIKE CONCAT('%', #{query.keyword}, '%')
+                     OR o.phone LIKE CONCAT('%', #{query.keyword}, '%'))
+            </if>
+            <if test="query.status != null and query.status != ''">
+                AND o.status = #{query.status}
+            </if>
+        </where>
+        ORDER BY o.create_time DESC
+    </select>
+
+</mapper>

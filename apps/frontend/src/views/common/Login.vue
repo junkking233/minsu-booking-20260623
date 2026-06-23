@@ -1,77 +1,71 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { Lock, User } from '@element-plus/icons-vue';
 import { ElMessage } from 'element-plus';
 import { authApi } from '@/api/authApi';
-import { hasRoutePermission, setAuthState } from '@/utils/auth';
+import { defaultPathForRole, setAuthState } from '@/utils/auth';
 
 const route = useRoute();
 const router = useRouter();
 
-const activeRole = ref<'portal' | 'partner' | 'admin'>('portal');
-const form = ref({ username: '', password: '' });
+const isRegister = ref(false);
+const loginForm = ref({ username: '', password: '' });
+const registerForm = ref({ username: '', password: '', confirmPassword: '', name: '' });
 const loading = ref(false);
-const remember = ref(false);
-
-const roleOptions = [
-  {
-    label: '普通用户',
-    value: 'portal' as const,
-    color: '#0d9488',
-    gradient: 'linear-gradient(135deg, #0d9488, #3b82f6)',
-    path: '/portal/home',
-    desc: '门户服务平台',
-    roles: ['ADMIN', 'PARTNER', 'USER'],
-  },
-  {
-    label: '服务方',
-    value: 'partner' as const,
-    color: '#f59e0b',
-    gradient: 'linear-gradient(135deg, #f59e0b, #f97316)',
-    path: '/partner/dashboard',
-    desc: '合作伙伴工作台',
-    roles: ['ADMIN', 'PARTNER'],
-  },
-  {
-    label: '管理员',
-    value: 'admin' as const,
-    color: '#3b82f6',
-    gradient: 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
-    path: '/admin/dashboard',
-    desc: '系统管理平台',
-    roles: ['ADMIN'],
-  },
-];
-
-const currentRole = computed(() => roleOptions.find((r) => r.value === activeRole.value)!);
 
 async function handleLogin() {
-  if (!form.value.username || !form.value.password) {
+  if (!loginForm.value.username || !loginForm.value.password) {
     ElMessage.warning('请输入用户名和密码');
     return;
   }
   loading.value = true;
   try {
     const result = await authApi.login({
-      username: form.value.username,
-      password: form.value.password,
+      username: loginForm.value.username,
+      password: loginForm.value.password,
     });
-
-    if (!currentRole.value.roles.includes(result.user.role)) {
-      ElMessage.error(`当前账号无权进入${currentRole.value.label}入口`);
-      return;
-    }
-
     setAuthState(result.token, result.user, result.expiresAt);
-    loading.value = false;
     ElMessage.success('登录成功');
-    const redirect = typeof route.query.redirect === 'string' && hasRoutePermission(route.query.redirect, result.user.role)
-      ? route.query.redirect
-      : currentRole.value.path;
+    const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : defaultPathForRole(result.user.role);
     await router.push(redirect);
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : '登录失败');
+  } finally {
+    loading.value = false;
+  }
+}
+
+async function handleRegister() {
+  if (!registerForm.value.username || !registerForm.value.password) {
+    ElMessage.warning('请填写用户名和密码');
+    return;
+  }
+  if (registerForm.value.username.length < 3 || registerForm.value.username.length > 20) {
+    ElMessage.warning('用户名必须为3-20位');
+    return;
+  }
+  if (registerForm.value.password.length < 6 || registerForm.value.password.length > 20) {
+    ElMessage.warning('密码必须为6-20位');
+    return;
+  }
+  if (registerForm.value.password !== registerForm.value.confirmPassword) {
+    ElMessage.warning('两次密码输入不一致');
+    return;
+  }
+  loading.value = true;
+  try {
+    await authApi.register({
+      username: registerForm.value.username,
+      password: registerForm.value.password,
+      name: registerForm.value.name || registerForm.value.username,
+    });
+    ElMessage.success('注册成功，请登录');
+    isRegister.value = false;
+    loginForm.value.username = registerForm.value.username;
+    registerForm.value = { username: '', password: '', confirmPassword: '', name: '' };
+  } catch (error) {
+    ElMessage.error(error instanceof Error ? error.message : '注册失败');
   } finally {
     loading.value = false;
   }
@@ -80,15 +74,12 @@ async function handleLogin() {
 
 <template>
   <div class="login-page">
-    <!-- 背景装饰 -->
     <div class="login-bg">
       <div class="bg-orb orb-1" />
       <div class="bg-orb orb-2" />
-      <div class="bg-orb orb-3" />
     </div>
 
     <div class="login-card">
-      <!-- Logo -->
       <div class="login-brand">
         <div class="brand-icon">
           <svg viewBox="0 0 48 48" fill="none">
@@ -96,69 +87,120 @@ async function handleLogin() {
             <path d="M14 34V20l10 8 10-8v14" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
             <defs>
               <linearGradient id="loginGrad" x1="0" y1="0" x2="48" y2="48">
-                <stop stop-color="#0d9488" />
-                <stop offset="1" stop-color="#3b82f6" />
+                <stop stop-color="#0ea5e9" />
+                <stop offset="1" stop-color="#2563eb" />
               </linearGradient>
             </defs>
           </svg>
         </div>
-        <h2>Fullstack App Starter</h2>
-        <p>门户 + 后台管理脚手架</p>
+        <h2>民宿预约管理系统</h2>
+        <p>发现美好住宿体验</p>
       </div>
 
-      <!-- 角色切换 -->
-      <div class="role-tabs">
-        <button
-          v-for="r in roleOptions"
-          :key="r.value"
-          class="role-tab"
-          :class="{ active: activeRole === r.value }"
-          :style="activeRole === r.value ? {
-            background: r.gradient,
-            color: '#fff',
-            boxShadow: `0 4px 14px ${r.color}40`,
-          } : {}"
-          @click="activeRole = r.value"
-        >
-          {{ r.label }}
-        </button>
-      </div>
+      <!-- 登录表单 -->
+      <template v-if="!isRegister">
+        <el-form :model="loginForm" class="login-form" @submit.prevent="handleLogin">
+          <el-form-item>
+            <el-input
+              v-model="loginForm.username"
+              :prefix-icon="User"
+              placeholder="请输入用户名"
+              size="large"
+            />
+          </el-form-item>
+          <el-form-item>
+            <el-input
+              v-model="loginForm.password"
+              :prefix-icon="Lock"
+              type="password"
+              show-password
+              placeholder="请输入密码"
+              size="large"
+              @keyup.enter="handleLogin"
+            />
+          </el-form-item>
+          <el-form-item>
+            <el-button
+              type="primary"
+              size="large"
+              class="submit-btn"
+              :loading="loading"
+              @click="handleLogin"
+            >
+              登 录
+            </el-button>
+          </el-form-item>
+        </el-form>
 
-      <p class="role-desc">{{ currentRole.desc }}</p>
-
-      <!-- 表单 -->
-      <el-form :model="form" class="login-form">
-        <el-form-item>
-          <el-input v-model="form.username" :prefix-icon="User" placeholder="请输入用户名" size="large" />
-        </el-form-item>
-        <el-form-item>
-          <el-input v-model="form.password" :prefix-icon="Lock" type="password" show-password placeholder="请输入密码" size="large" />
-        </el-form-item>
-        <div class="form-options">
-          <el-checkbox v-model="remember">记住我</el-checkbox>
-          <el-button type="primary" link size="small">忘记密码？</el-button>
+        <div class="form-switch">
+          <span>还没有账号？</span>
+          <el-button type="primary" link @click="isRegister = true">立即注册</el-button>
         </div>
-        <el-form-item>
-          <el-button
-            type="primary"
-            size="large"
-            class="submit-btn"
-            :loading="loading"
-            @click="handleLogin"
-          >
-            登 录
-          </el-button>
-        </el-form-item>
-      </el-form>
+      </template>
 
-      <!-- 演示账号 -->
+      <!-- 注册表单 -->
+      <template v-else>
+        <el-form :model="registerForm" class="login-form" @submit.prevent="handleRegister">
+          <el-form-item>
+            <el-input
+              v-model="registerForm.username"
+              :prefix-icon="User"
+              placeholder="用户名（3-20位）"
+              size="large"
+            />
+          </el-form-item>
+          <el-form-item>
+            <el-input
+              v-model="registerForm.name"
+              :prefix-icon="User"
+              placeholder="昵称（选填）"
+              size="large"
+            />
+          </el-form-item>
+          <el-form-item>
+            <el-input
+              v-model="registerForm.password"
+              :prefix-icon="Lock"
+              type="password"
+              show-password
+              placeholder="密码（6-20位）"
+              size="large"
+            />
+          </el-form-item>
+          <el-form-item>
+            <el-input
+              v-model="registerForm.confirmPassword"
+              :prefix-icon="Lock"
+              type="password"
+              show-password
+              placeholder="确认密码"
+              size="large"
+              @keyup.enter="handleRegister"
+            />
+          </el-form-item>
+          <el-form-item>
+            <el-button
+              type="primary"
+              size="large"
+              class="submit-btn"
+              :loading="loading"
+              @click="handleRegister"
+            >
+              注 册
+            </el-button>
+          </el-form-item>
+        </el-form>
+
+        <div class="form-switch">
+          <span>已有账号？</span>
+          <el-button type="primary" link @click="isRegister = false">返回登录</el-button>
+        </div>
+      </template>
+
+      <!-- 演示账号提示 -->
       <div class="demo-hint">
-        <el-tag size="small" effect="light" round>演示账号</el-tag>
+        <span class="hint-label">演示账号：</span>
         <span>管理员 <strong>admin</strong> / <strong>admin123</strong></span>
-        <span class="hint-divider">·</span>
-        <span>服务方 <strong>partner</strong> / <strong>123456</strong></span>
-        <span class="hint-divider">·</span>
-        <span>用户 <strong>user</strong> / <strong>123456</strong></span>
       </div>
     </div>
   </div>
@@ -174,8 +216,8 @@ async function handleLogin() {
   padding: 20px;
   overflow: hidden;
   background:
-    radial-gradient(ellipse 80% 60% at 15% 10%, rgb(13 148 136 / 8%), transparent),
-    radial-gradient(ellipse 60% 50% at 85% 90%, rgb(59 130 246 / 6%), transparent),
+    radial-gradient(ellipse 80% 60% at 15% 10%, rgb(14 165 233 / 8%), transparent),
+    radial-gradient(ellipse 60% 50% at 85% 90%, rgb(37 99 235 / 6%), transparent),
     var(--c-bg);
 }
 
@@ -198,7 +240,7 @@ async function handleLogin() {
   height: 500px;
   top: -200px;
   left: -100px;
-  background: rgb(13 148 136 / 12%);
+  background: rgb(14 165 233 / 10%);
 }
 
 .orb-2 {
@@ -206,23 +248,15 @@ async function handleLogin() {
   height: 400px;
   bottom: -150px;
   right: -80px;
-  background: rgb(59 130 246 / 10%);
-}
-
-.orb-3 {
-  width: 300px;
-  height: 300px;
-  top: 40%;
-  left: 50%;
-  background: rgb(245 158 11 / 6%);
+  background: rgb(37 99 235 / 8%);
 }
 
 .login-card {
   position: relative;
   width: 100%;
-  max-width: 440px;
+  max-width: 420px;
   padding: 40px 36px;
-  background: rgb(255 255 255 / 92%);
+  background: rgb(255 255 255 / 95%);
   border: 1px solid var(--c-line);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-xl);
@@ -230,10 +264,9 @@ async function handleLogin() {
   -webkit-backdrop-filter: blur(20px);
 }
 
-/* Brand */
 .login-brand {
   text-align: center;
-  margin-bottom: 28px;
+  margin-bottom: 32px;
 }
 
 .brand-icon {
@@ -245,7 +278,7 @@ async function handleLogin() {
 .brand-icon svg {
   width: 100%;
   height: 100%;
-  filter: drop-shadow(0 4px 10px rgb(13 148 136 / 30%));
+  filter: drop-shadow(0 4px 10px rgb(14 165 233 / 30%));
 }
 
 .login-brand h2 {
@@ -261,53 +294,13 @@ async function handleLogin() {
   font-size: 14px;
 }
 
-/* Role Tabs */
-.role-tabs {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-
-.role-tab {
-  flex: 1;
-  height: 42px;
-  color: var(--c-muted);
-  font-size: 14px;
-  font-weight: 600;
-  background: var(--c-bg);
-  border: 1.5px solid var(--c-line);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.role-tab:hover:not(.active) {
-  border-color: var(--c-primary);
-  color: var(--c-primary);
-}
-
-.role-desc {
-  text-align: center;
-  margin: 0 0 20px;
-  color: var(--c-muted-light);
-  font-size: 12px;
-}
-
-/* Form */
 .login-form :deep(.el-input__wrapper) {
   border-radius: var(--radius-md);
   padding: 4px 12px;
 }
 
 .login-form :deep(.el-input__inner) {
-  height: 42px;
-}
-
-.form-options {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin: -4px 0 16px;
+  height: 44px;
 }
 
 .submit-btn {
@@ -319,27 +312,33 @@ async function handleLogin() {
   letter-spacing: 2px;
 }
 
-/* Demo Hint */
+.form-switch {
+  text-align: center;
+  color: var(--c-muted);
+  font-size: 14px;
+  margin-top: -4px;
+}
+
 .demo-hint {
   display: flex;
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
   margin-top: 24px;
   padding-top: 20px;
   color: var(--c-muted);
-  font-size: 12px;
+  font-size: 13px;
   border-top: 1px dashed var(--c-line);
+}
+
+.hint-label {
+  font-weight: 500;
 }
 
 .demo-hint strong {
   color: var(--c-ink-light);
   font-weight: 600;
-}
-
-.hint-divider {
-  color: var(--c-line);
 }
 
 @media (max-width: 560px) {

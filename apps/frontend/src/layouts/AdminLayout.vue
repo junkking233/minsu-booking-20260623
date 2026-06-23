@@ -2,15 +2,11 @@
 import { computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import {
-  Bell,
-  ChatDotRound,
+  ChatLineSquare,
   DataAnalysis,
-  Grid,
-  Histogram,
-  List,
-  Monitor,
-  SwitchButton,
+  HomeFilled,
   Setting,
+  SwitchButton,
   Tickets,
   UserFilled,
 } from '@element-plus/icons-vue';
@@ -21,19 +17,25 @@ const router = useRouter();
 const currentUser = getCurrentUser();
 
 const menuItems = [
-  { index: '/admin/screen', title: '数据大屏', icon: Monitor },
-  { index: '/admin/dashboard', title: '运营概览', icon: DataAnalysis },
-  { index: '/admin/management', title: '数据管理', icon: Tickets },
-  { index: '/admin/visual-list', title: '可视化列表', icon: List },
-  { index: '/admin/analytics', title: '数据可视化', icon: Histogram },
+  { index: '/admin/dashboard', title: '数据看板', icon: DataAnalysis },
+  { index: '/admin/houses', title: '房源管理', icon: HomeFilled },
+  { index: '/admin/orders', title: '订单管理', icon: Tickets },
+  { index: '/admin/reviews', title: '评价管理', icon: ChatLineSquare },
   { index: '/admin/users', title: '用户管理', icon: UserFilled },
-  { index: '/admin/chat', title: 'AI 助手', icon: ChatDotRound },
   { index: '/admin/settings', title: '系统配置', icon: Setting },
 ];
 
 const pageTitle = computed(() => {
-  const item = menuItems.find((m) => m.index === route.path);
+  const item = menuItems.find((m) => route.path.startsWith(m.index));
   return item?.title ?? '管理后台';
+});
+
+const breadcrumbs = computed(() => {
+  const parts: string[] = ['管理后台'];
+  const item = menuItems.find((m) => route.path.startsWith(m.index));
+  if (item) parts.push(item.title);
+  if (route.path.includes('/calendar/')) parts.push('房态维护');
+  return parts;
 });
 
 function logout() {
@@ -45,7 +47,6 @@ function logout() {
 <template>
   <div class="admin-layout">
     <aside class="admin-sidebar">
-      <!-- Logo -->
       <div class="sidebar-brand" @click="router.push('/admin/dashboard')">
         <div class="brand-icon">
           <svg viewBox="0 0 36 36" fill="none">
@@ -53,30 +54,28 @@ function logout() {
             <path d="M10 26V14l8 5.5L26 14v12" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
             <defs>
               <linearGradient id="adminGrad" x1="0" y1="0" x2="36" y2="36">
-                <stop stop-color="#10BFA3" />
-                <stop offset="1" stop-color="#31D18B" />
+                <stop stop-color="#0ea5e9" />
+                <stop offset="1" stop-color="#2563eb" />
               </linearGradient>
             </defs>
           </svg>
         </div>
         <div class="brand-text">
-          <div class="brand-title">明析管理平台</div>
+          <div class="brand-title">民宿管理</div>
           <div class="brand-sub">Admin Console</div>
         </div>
       </div>
 
-      <!-- User -->
       <div class="sidebar-user">
         <el-avatar :size="40" class="user-avatar">
           <el-icon><UserFilled /></el-icon>
         </el-avatar>
         <div class="user-info">
-          <strong>{{ currentUser?.username || '管理员' }}</strong>
-          <span>{{ currentUser?.email || 'admin@example.com' }}</span>
+          <strong>{{ currentUser?.name || currentUser?.username || '管理员' }}</strong>
+          <span>系统管理员</span>
         </div>
       </div>
 
-      <!-- Menu -->
       <el-menu :default-active="route.path" class="admin-menu" router>
         <el-menu-item v-for="item in menuItems" :key="item.index" :index="item.index">
           <el-icon><component :is="item.icon" /></el-icon>
@@ -84,7 +83,6 @@ function logout() {
         </el-menu-item>
       </el-menu>
 
-      <!-- Logout -->
       <div class="sidebar-bottom">
         <el-button :icon="SwitchButton" text type="danger" class="logout-btn" @click="logout">
           退出登录
@@ -94,13 +92,15 @@ function logout() {
 
     <section class="admin-main">
       <header class="admin-header">
-        <div class="header-title">
-          <span class="breadcrumb">Admin Console</span>
+        <div class="header-left">
+          <el-breadcrumb separator="/">
+            <el-breadcrumb-item v-for="(b, i) in breadcrumbs" :key="i">{{ b }}</el-breadcrumb-item>
+          </el-breadcrumb>
           <h2>{{ pageTitle }}</h2>
         </div>
-        <div class="header-actions">
-          <el-button :icon="Bell" circle class="header-icon-btn" />
-          <el-button type="primary" :icon="Grid" class="create-btn">快捷操作</el-button>
+        <div class="header-right">
+          <span class="header-user">{{ currentUser?.name || currentUser?.username }}</span>
+          <el-button text type="danger" @click="logout">退出</el-button>
         </div>
       </header>
 
@@ -118,7 +118,7 @@ function logout() {
 <style scoped>
 .admin-layout {
   display: grid;
-  grid-template-columns: 252px minmax(0, 1fr);
+  grid-template-columns: 240px minmax(0, 1fr);
   min-height: 100vh;
   background: var(--c-bg);
 }
@@ -128,7 +128,7 @@ function logout() {
   top: 0;
   display: flex;
   height: 100vh;
-  padding: 20px 14px;
+  padding: 20px 12px;
   flex-direction: column;
   background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
   border-right: 1px solid rgb(255 255 255 / 6%);
@@ -138,8 +138,8 @@ function logout() {
 .sidebar-brand {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 6px 10px 18px;
+  gap: 10px;
+  padding: 6px 10px 16px;
   border-bottom: 1px solid rgb(255 255 255 / 8%);
   cursor: pointer;
   transition: opacity var(--transition-fast);
@@ -150,22 +150,21 @@ function logout() {
 }
 
 .brand-icon {
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
   flex-shrink: 0;
 }
 
 .brand-icon svg {
   width: 100%;
   height: 100%;
-  filter: drop-shadow(0 2px 8px rgb(16 191 163 / 38%));
+  filter: drop-shadow(0 2px 8px rgb(14 165 233 / 38%));
 }
 
 .brand-title {
   color: #f8fafc;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
-  letter-spacing: -0.2px;
 }
 
 .brand-sub {
@@ -174,22 +173,21 @@ function logout() {
   font-weight: 500;
   letter-spacing: 0.8px;
   text-transform: uppercase;
-  margin-top: 1px;
 }
 
 /* User */
 .sidebar-user {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 18px 10px;
+  gap: 10px;
+  padding: 16px 10px;
   border-bottom: 1px solid rgb(255 255 255 / 6%);
 }
 
 .user-avatar {
-  background: linear-gradient(135deg, #10bfa3, #31d18b);
+  background: linear-gradient(135deg, #0ea5e9, #2563eb);
   color: #fff;
-  box-shadow: 0 2px 8px rgb(16 191 163 / 28%);
+  box-shadow: 0 2px 8px rgb(14 165 233 / 28%);
 }
 
 .user-info {
@@ -221,14 +219,13 @@ function logout() {
 }
 
 .admin-menu :deep(.el-menu-item) {
-  height: 46px;
+  height: 44px;
   margin-bottom: 4px;
   padding-left: 14px !important;
   color: #cbd5e1;
   font-size: 14px;
   font-weight: 500;
   border-radius: var(--radius-md);
-  transition: all var(--transition-fast);
 }
 
 .admin-menu :deep(.el-menu-item .el-icon) {
@@ -243,8 +240,8 @@ function logout() {
 
 .admin-menu :deep(.el-menu-item.is-active) {
   color: #fff;
-  background: linear-gradient(135deg, rgb(16 191 163 / 22%), rgb(49 209 139 / 10%));
-  box-shadow: 0 0 0 1px rgb(16 191 163 / 20%), inset 3px 0 0 #10bfa3;
+  background: linear-gradient(135deg, rgb(14 165 233 / 22%), rgb(37 99 235 / 10%));
+  box-shadow: 0 0 0 1px rgb(14 165 233 / 20%), inset 3px 0 0 #0ea5e9;
   font-weight: 600;
 }
 
@@ -260,7 +257,6 @@ function logout() {
   color: #f87171;
   font-weight: 500;
   border-radius: var(--radius-md);
-  transition: all var(--transition-fast);
 }
 
 .logout-btn:hover {
@@ -283,54 +279,24 @@ function logout() {
   border-bottom: 1px solid var(--c-line);
 }
 
-.breadcrumb {
-  display: block;
-  color: var(--c-muted);
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.3px;
-  text-transform: uppercase;
-  margin-bottom: 4px;
-}
-
 .admin-header h2 {
-  margin: 0;
-  font-size: 24px;
+  margin: 8px 0 0;
+  font-size: 22px;
   font-weight: 700;
   letter-spacing: -0.5px;
   color: var(--c-ink);
 }
 
-.header-actions {
+.header-right {
   display: flex;
-  gap: 10px;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
 }
 
-.header-icon-btn {
-  color: var(--c-muted);
-  background: var(--c-surface);
-  border: 1px solid var(--c-line);
-  transition: all var(--transition-fast);
-}
-
-.header-icon-btn:hover {
-  color: var(--primary);
-  background: var(--primary-soft);
-  border-color: rgb(16 191 163 / 20%);
-  transform: translateY(-1px);
-}
-
-.create-btn {
-  font-weight: 600;
-  border-radius: var(--radius-md);
-  padding: 0 18px;
-  background: linear-gradient(135deg, #10bfa3, #0a9a82);
-  box-shadow: 0 2px 6px rgb(16 191 163 / 25%);
-}
-
-.create-btn:hover {
-  background: linear-gradient(135deg, #31d18b, #10bfa3);
-  box-shadow: 0 4px 12px rgb(16 191 163 / 35%);
+.header-user {
+  font-size: 14px;
+  color: var(--c-body);
 }
 
 .admin-content {
@@ -353,7 +319,6 @@ function logout() {
   transform: translateX(8px);
 }
 
-/* Responsive */
 @media (max-width: 860px) {
   .admin-layout {
     grid-template-columns: 1fr;
@@ -362,15 +327,15 @@ function logout() {
   .admin-sidebar {
     position: relative;
     height: auto;
-    padding: 12px;
+    padding: 10px;
     flex-direction: row;
     flex-wrap: wrap;
-    gap: 8px;
-    background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+    gap: 6px;
   }
 
   .sidebar-brand,
-  .sidebar-user {
+  .sidebar-user,
+  .sidebar-bottom {
     display: none;
   }
 
@@ -378,26 +343,19 @@ function logout() {
     display: flex;
     flex: 1 1 auto;
     min-width: 0;
-    gap: 6px;
+    gap: 4px;
     padding-top: 0;
   }
 
   .admin-menu :deep(.el-menu-item) {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 0;
-    padding: 0 14px !important;
     flex: 1;
+    justify-content: center;
+    padding: 0 12px !important;
+    margin-bottom: 0;
   }
 
-  .admin-menu :deep(.el-menu-item.is-active) {
-    box-shadow: 0 0 0 1px rgb(16 191 163 / 20%);
-    border-left: none;
-    inset: none;
-  }
-
-  .sidebar-bottom {
-    display: none;
+  .admin-menu :deep(.el-menu-item .el-icon) {
+    margin-right: 6px;
   }
 
   .admin-main {

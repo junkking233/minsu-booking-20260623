@@ -41,16 +41,43 @@ public class AuthInterceptor implements HandlerInterceptor {
 
         TokenSubject subject = new TokenSubject(user.getId(), user.getUsername(), user.getRole(), tokenSubject.getExpiresAt());
         request.setAttribute("currentUser", subject);
-        checkPermission(request.getRequestURI(), subject);
+        checkPermission(request.getRequestURI(), request.getMethod(), subject);
         return true;
     }
 
-    private void checkPermission(String path, TokenSubject subject) {
+    private void checkPermission(String path, String method, TokenSubject subject) {
+        // /api/admin/** 需要 ADMIN 角色
+        if (path.startsWith("/api/admin") && !"ADMIN".equals(subject.getRole())) {
+            throw new BusinessException(403, "无权访问管理接口");
+        }
+
+        // /api/users/** 需要 ADMIN 角色
         if (path.startsWith("/api/users") && !"ADMIN".equals(subject.getRole())) {
             throw new BusinessException(403, "无权访问用户管理接口");
         }
-        if (path.startsWith("/api/charts") && !("ADMIN".equals(subject.getRole()) || "PARTNER".equals(subject.getRole()))) {
-            throw new BusinessException(403, "无权访问图表接口");
+
+        // /api/orders/** 创建订单和我的订单需要 USER 角色
+        if (path.startsWith("/api/orders")) {
+            if (path.matches("/api/orders/?$") && "POST".equalsIgnoreCase(method)) {
+                if (!"USER".equals(subject.getRole()) && !"ADMIN".equals(subject.getRole())) {
+                    throw new BusinessException(403, "无权创建订单");
+                }
+            }
+            if (path.contains("/my") && !"USER".equals(subject.getRole()) && !"ADMIN".equals(subject.getRole())) {
+                throw new BusinessException(403, "无权查看个人订单");
+            }
+        }
+
+        // /api/favorites/** 需要 USER 角色
+        if (path.startsWith("/api/favorites") && !"USER".equals(subject.getRole()) && !"ADMIN".equals(subject.getRole())) {
+            throw new BusinessException(403, "无权访问收藏功能");
+        }
+
+        // /api/reviews POST 需要 USER 角色
+        if (path.startsWith("/api/reviews") && "POST".equalsIgnoreCase(method)) {
+            if (!"USER".equals(subject.getRole()) && !"ADMIN".equals(subject.getRole())) {
+                throw new BusinessException(403, "无权创建评价");
+            }
         }
     }
 }

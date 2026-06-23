@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import PortalLayout from '@/layouts/PortalLayout.vue';
-import PartnerLayout from '@/layouts/PartnerLayout.vue';
 import AdminLayout from '@/layouts/AdminLayout.vue';
 import BlankLayout from '@/layouts/BlankLayout.vue';
 import { defaultPathForRole, getCurrentUser, hasRoutePermission } from '@/utils/auth';
@@ -8,124 +7,115 @@ import { defaultPathForRole, getCurrentUser, hasRoutePermission } from '@/utils/
 const router = createRouter({
   history: createWebHistory(),
   routes: [
-    // 普通用户门户
+    // 用户端门户
     {
-      path: '/',
+      path: '/portal',
       component: PortalLayout,
       redirect: '/portal/home',
       children: [
         {
-          path: 'portal/home',
+          path: 'home',
           name: 'PortalHome',
           component: () => import('@/views/portal/Home.vue'),
           meta: { title: '首页' },
         },
         {
-          path: 'portal/services',
-          name: 'PortalServices',
-          component: () => import('@/views/portal/Services.vue'),
-          meta: { title: '服务大厅' },
+          path: 'houses',
+          name: 'PortalHouseList',
+          component: () => import('@/views/portal/HouseList.vue'),
+          meta: { title: '房源列表' },
         },
         {
-          path: 'portal/my-business',
-          name: 'PortalMyBusiness',
-          component: () => import('@/views/portal/MyBusiness.vue'),
-          meta: { title: '我的业务', requiresAuth: true },
+          path: 'houses/:id',
+          name: 'PortalHouseDetail',
+          component: () => import('@/views/portal/HouseDetail.vue'),
+          meta: { title: '房源详情' },
         },
         {
-          path: 'portal/profile',
+          path: 'booking/:houseId',
+          name: 'PortalBooking',
+          component: () => import('@/views/portal/Booking.vue'),
+          meta: { title: '预约下单', requiresAuth: true },
+        },
+        {
+          path: 'orders',
+          name: 'PortalMyOrders',
+          component: () => import('@/views/portal/MyOrders.vue'),
+          meta: { title: '我的订单', requiresAuth: true },
+        },
+        {
+          path: 'orders/:orderNo',
+          name: 'PortalOrderDetail',
+          component: () => import('@/views/portal/OrderDetail.vue'),
+          meta: { title: '订单详情', requiresAuth: true },
+        },
+        {
+          path: 'review/:orderNo',
+          name: 'PortalReviewCreate',
+          component: () => import('@/views/portal/ReviewCreate.vue'),
+          meta: { title: '发表评价', requiresAuth: true },
+        },
+        {
+          path: 'favorites',
+          name: 'PortalFavorites',
+          component: () => import('@/views/portal/Favorites.vue'),
+          meta: { title: '我的收藏', requiresAuth: true },
+        },
+        {
+          path: 'profile',
           name: 'PortalProfile',
           component: () => import('@/views/portal/Profile.vue'),
           meta: { title: '个人中心', requiresAuth: true },
         },
       ],
     },
-    // 服务方门户
-    {
-      path: '/partner',
-      component: PartnerLayout,
-      redirect: '/partner/dashboard',
-      meta: { requiresAuth: true, roles: ['ADMIN', 'PARTNER'] },
-      children: [
-        {
-          path: 'dashboard',
-          name: 'PartnerDashboard',
-          component: () => import('@/views/partner/Dashboard.vue'),
-          meta: { title: '总览' },
-        },
-        {
-          path: 'tasks',
-          name: 'PartnerTasks',
-          component: () => import('@/views/partner/Tasks.vue'),
-          meta: { title: '工单管理' },
-        },
-        {
-          path: 'resources',
-          name: 'PartnerResources',
-          component: () => import('@/views/partner/Resources.vue'),
-          meta: { title: '资源管理' },
-        },
-        {
-          path: 'reports',
-          name: 'PartnerReports',
-          component: () => import('@/views/partner/Reports.vue'),
-          meta: { title: '报表中心' },
-        },
-      ],
-    },
     // 管理后台
-    {
-      path: '/admin/screen',
-      name: 'AdminScreen',
-      component: () => import('@/views/admin/Screen.vue'),
-      meta: { title: '数据大屏', requiresAuth: true, roles: ['ADMIN'] },
-    },
     {
       path: '/admin',
       component: AdminLayout,
       redirect: '/admin/dashboard',
-      meta: { requiresAuth: true, roles: ['ADMIN'] },
+      meta: { requiresAuth: true },
       children: [
         {
           path: 'dashboard',
           name: 'AdminDashboard',
-          component: () => import('@/admin-platform/views/DashboardView.vue'),
-          meta: { title: '运营概览', icon: 'DataAnalysis' },
+          component: () => import('@/views/admin/Dashboard.vue'),
+          meta: { title: '数据看板', icon: 'DataAnalysis' },
         },
         {
-          path: 'management',
-          name: 'AdminManagement',
-          component: () => import('@/admin-platform/views/ManagementView.vue'),
-          meta: { title: '数据管理', icon: 'Tickets' },
+          path: 'houses',
+          name: 'AdminHouseManage',
+          component: () => import('@/views/admin/HouseManage.vue'),
+          meta: { title: '房源管理', icon: 'HomeFilled' },
         },
         {
-          path: 'visual-list',
-          name: 'AdminVisualList',
-          component: () => import('@/admin-platform/views/VisualListView.vue'),
-          meta: { title: '可视化列表', icon: 'List' },
+          path: 'calendar/:houseId',
+          name: 'AdminCalendarManage',
+          component: () => import('@/views/admin/CalendarManage.vue'),
+          meta: { title: '房态维护', icon: 'Calendar' },
         },
         {
-          path: 'analytics',
-          name: 'AdminAnalytics',
-          component: () => import('@/admin-platform/views/AnalyticsView.vue'),
-          meta: { title: '数据可视化', icon: 'Histogram' },
+          path: 'orders',
+          name: 'AdminOrderManage',
+          component: () => import('@/views/admin/OrderManage.vue'),
+          meta: { title: '订单管理', icon: 'Tickets' },
+        },
+        {
+          path: 'reviews',
+          name: 'AdminReviewManage',
+          component: () => import('@/views/admin/ReviewManage.vue'),
+          meta: { title: '评价管理', icon: 'ChatLineSquare' },
         },
         {
           path: 'users',
-          name: 'AdminUsers',
-          component: () => import('@/views/admin/Users.vue'),
+          name: 'AdminUserManage',
+          component: () => import('@/views/admin/UserManage.vue'),
           meta: { title: '用户管理', icon: 'UserFilled' },
-        },
-        {
-          path: 'chat',
-          name: 'AdminChat',
-          component: () => import('@/views/admin/Chat.vue'),
-          meta: { title: 'AI 助手', icon: 'ChatDotRound' },
         },
         {
           path: 'settings',
           name: 'AdminSettings',
-          component: () => import('@/admin-platform/views/SettingsView.vue'),
+          component: () => import('@/views/admin/Settings.vue'),
           meta: { title: '系统配置', icon: 'Setting' },
         },
       ],
@@ -144,16 +134,21 @@ const router = createRouter({
       ],
     },
     {
+      path: '/',
+      redirect: '/portal/home',
+    },
+    {
       path: '/:pathMatch(.*)*',
-      redirect: '/',
+      redirect: '/portal/home',
     },
   ],
 });
 
 router.beforeEach((to, _from, next) => {
-  document.title = to.meta.title ? `${to.meta.title} - 平台名称` : '平台名称';
+  document.title = to.meta.title ? `${to.meta.title} - 民宿预约` : '民宿预约';
 
   const currentUser = getCurrentUser();
+
   if (to.path === '/login' && currentUser) {
     next(defaultPathForRole(currentUser.role));
     return;
@@ -161,12 +156,6 @@ router.beforeEach((to, _from, next) => {
 
   if (to.meta.requiresAuth && !currentUser) {
     next({ path: '/login', query: { redirect: to.fullPath } });
-    return;
-  }
-
-  const roles = to.meta.roles as string[] | undefined;
-  if (currentUser && roles && !roles.includes(currentUser.role)) {
-    next(defaultPathForRole(currentUser.role));
     return;
   }
 

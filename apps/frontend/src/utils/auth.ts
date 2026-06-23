@@ -1,7 +1,9 @@
 export interface AuthUser {
   id: number;
   username: string;
-  email: string;
+  name: string;
+  phone: string | null;
+  avatar: string | null;
   role: string;
   status: number;
 }
@@ -54,18 +56,12 @@ export function defaultPathForRole(role: string) {
   if (role === 'ADMIN') {
     return '/admin/dashboard';
   }
-  if (role === 'PARTNER') {
-    return '/partner/dashboard';
-  }
   return '/portal/home';
 }
 
 export function hasRoutePermission(path: string, role: string) {
   if (path.startsWith('/admin')) {
     return role === 'ADMIN';
-  }
-  if (path.startsWith('/partner')) {
-    return role === 'ADMIN' || role === 'PARTNER';
   }
   return true;
 }

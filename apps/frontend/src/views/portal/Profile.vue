@@ -1,332 +1,339 @@
 <script setup lang="ts">
-import { reactive, ref } from 'vue';
-import { Camera, Lock, Message, Phone, User } from '@element-plus/icons-vue';
+import { onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
+import { User } from '@element-plus/icons-vue';
 import { authApi } from '@/api/authApi';
-import { getCurrentUser } from '@/utils/auth';
+import { orderApi } from '@/api/orderApi';
+import { favoriteApi } from '@/api/favoriteApi';
+import { clearAuthState, getCurrentUser, setAuthState, getAuthState } from '@/utils/auth';
 
-const activeTab = ref('info');
+const router = useRouter();
 const currentUser = getCurrentUser();
 
-const profileForm = reactive({
-  nickname: currentUser?.username || '',
-  realName: currentUser?.username || '',
-  email: currentUser?.email || '',
-  phone: '',
-  idCard: '11010119900101****',
-  address: '北京市朝阳区',
-});
+const editForm = ref({ name: '', phone: '' });
+const editing = ref(false);
+const saving = ref(false);
 
-const passwordForm = reactive({
-  oldPassword: '',
-  newPassword: '',
-  confirmPassword: '',
-});
+const passwordForm = ref({ oldPassword: '', newPassword: '', confirmPassword: '' });
+const showPasswordForm = ref(false);
+const changingPassword = ref(false);
 
-function saveProfile() {
-  ElMessage.success('个人信息保存成功');
+const orderStats = ref({ total: 0, pending: 0, completed: 0 });
+const favCount = ref(0);
+
+function startEdit() {
+  editForm.value.name = currentUser?.name || '';
+  editForm.value.phone = currentUser?.phone || '';
+  editing.value = true;
 }
 
-async function savePassword() {
-  if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-    ElMessage.error('两次输入的密码不一致');
+function cancelEdit() {
+  editing.value = false;
+}
+
+async function saveProfile() {
+  saving.value = true;
+  try {
+    await authApi.updateProfile({
+      name: editForm.value.name,
+      phone: editForm.value.phone,
+    });
+    const state = getAuthState();
+    if (state) {
+      setAuthState(state.token, { ...state.user, name: editForm.value.name, phone: editForm.value.phone }, state.expiresAt);
+    }
+    ElMessage.success('保存成功');
+    editing.value = false;
+  } catch (e) {
+    ElMessage.error(e instanceof Error ? e.message : '保存失败');
+  } finally {
+    saving.value = false;
+  }
+}
+
+async function changePassword() {
+  if (!passwordForm.value.oldPassword || !passwordForm.value.newPassword) {
+    ElMessage.warning('请填写密码');
     return;
   }
+  if (passwordForm.value.newPassword !== passwordForm.value.confirmPassword) {
+    ElMessage.warning('两次密码不一致');
+    return;
+  }
+  changingPassword.value = true;
   try {
     await authApi.changePassword({
-      oldPassword: passwordForm.oldPassword,
-      newPassword: passwordForm.newPassword,
+      oldPassword: passwordForm.value.oldPassword,
+      newPassword: passwordForm.value.newPassword,
     });
-    passwordForm.oldPassword = '';
-    passwordForm.newPassword = '';
-    passwordForm.confirmPassword = '';
-    ElMessage.success('密码修改成功');
-  } catch (error) {
-    ElMessage.error(error instanceof Error ? error.message : '密码修改失败');
+    ElMessage.success('密码修改成功，请重新登录');
+    clearAuthState();
+    router.push('/login');
+  } catch (e) {
+    ElMessage.error(e instanceof Error ? e.message : '修改失败');
+  } finally {
+    changingPassword.value = false;
   }
 }
+
+function logout() {
+  clearAuthState();
+  router.push('/login');
+}
+
+async function loadStats() {
+  try {
+    const [ordersData, favsData] = await Promise.all([
+      orderApi.myOrders({ pageSize: 1 }),
+      favoriteApi.myList(),
+    ]);
+    const orders = ordersData as { total: number };
+    const favs = favsData as any[];
+    orderStats.value.total = orders.total || 0;
+    favCount.value = favs.length || 0;
+
+    // Load status counts
+    const pending = await orderApi.myOrders({ status: 'PENDING', pageSize: 1 }) as { total: number };
+    const completed = await orderApi.myOrders({ status: 'COMPLETED', pageSize: 1 }) as { total: number };
+    orderStats.value.pending = pending.total || 0;
+    orderStats.value.completed = completed.total || 0;
+  } catch { /* stats are optional */ }
+}
+
+onMounted(() => {
+  editForm.value.name = currentUser?.name || '';
+  editForm.value.phone = currentUser?.phone || '';
+  loadStats();
+});
 </script>
 
 <template>
   <div class="profile-page">
-    <div class="page-header">
-      <h1>个人中心</h1>
-      <p>管理您的个人信息和账号安全</p>
-    </div>
+    <div class="page-inner">
+      <h1 class="page-title">个人中心</h1>
 
-    <div class="profile-layout">
-      <!-- 左侧卡片 -->
-      <aside class="profile-sidebar">
-        <div class="avatar-section">
-          <div class="avatar-wrap">
-            <el-avatar :size="90" class="main-avatar">
-              <el-icon><User /></el-icon>
-            </el-avatar>
-            <div class="avatar-overlay">
-              <el-icon><Camera /></el-icon>
+      <div class="profile-grid">
+        <!-- 左侧个人信息 -->
+        <div class="profile-main">
+          <el-card class="profile-card">
+            <div class="profile-header">
+              <el-avatar :size="64" class="profile-avatar">
+                <el-icon :size="36"><User /></el-icon>
+              </el-avatar>
+              <div class="profile-meta">
+                <h2>{{ currentUser?.name || currentUser?.username }}</h2>
+                <p>@{{ currentUser?.username }}</p>
+              </div>
             </div>
-          </div>
-          <h3>{{ profileForm.nickname }}</h3>
-          <p class="role-badge">普通用户</p>
-        </div>
 
-        <div class="profile-stats">
-          <div class="stat-item">
-            <strong>12</strong>
-            <span>业务</span>
-          </div>
-          <div class="stat-divider" />
-          <div class="stat-item">
-            <strong>3</strong>
-            <span>消息</span>
-          </div>
-          <div class="stat-divider" />
-          <div class="stat-item">
-            <strong>0</strong>
-            <span>待办</span>
-          </div>
-        </div>
+            <!-- 编辑模式 -->
+            <template v-if="editing">
+              <el-form :model="editForm" label-width="60px" class="edit-form">
+                <el-form-item label="昵称">
+                  <el-input v-model="editForm.name" placeholder="请输入昵称" />
+                </el-form-item>
+                <el-form-item label="手机号">
+                  <el-input v-model="editForm.phone" placeholder="请输入手机号" />
+                </el-form-item>
+                <el-form-item>
+                  <el-button type="primary" :loading="saving" @click="saveProfile">保存</el-button>
+                  <el-button @click="cancelEdit">取消</el-button>
+                </el-form-item>
+              </el-form>
+            </template>
 
-        <div class="profile-meta">
-          <div class="meta-row">
-            <el-icon><Message /></el-icon>
-            <span>{{ profileForm.email }}</span>
-          </div>
-          <div class="meta-row">
-            <el-icon><Phone /></el-icon>
-            <span>{{ profileForm.phone }}</span>
-          </div>
-        </div>
-      </aside>
+            <!-- 查看模式 -->
+            <template v-else>
+              <div class="profile-info">
+                <div class="info-row">
+                  <label>昵称</label>
+                  <span>{{ currentUser?.name || '-' }}</span>
+                </div>
+                <div class="info-row">
+                  <label>手机号</label>
+                  <span>{{ currentUser?.phone || '未绑定' }}</span>
+                </div>
+              </div>
+              <el-button type="primary" @click="startEdit" class="edit-btn">编辑资料</el-button>
+            </template>
+          </el-card>
 
-      <!-- 右侧表单 -->
-      <section class="profile-content">
-        <el-tabs v-model="activeTab" class="profile-tabs">
-          <el-tab-pane label="基本信息" name="info">
-            <el-form :model="profileForm" label-width="90px" class="profile-form">
-              <el-form-item label="昵称">
-                <el-input v-model="profileForm.nickname" :prefix-icon="User" />
-              </el-form-item>
-              <el-form-item label="真实姓名">
-                <el-input v-model="profileForm.realName" disabled />
-              </el-form-item>
-              <el-form-item label="邮箱">
-                <el-input v-model="profileForm.email" :prefix-icon="Message" />
-              </el-form-item>
-              <el-form-item label="手机号">
-                <el-input v-model="profileForm.phone" :prefix-icon="Phone" />
-              </el-form-item>
-              <el-form-item label="身份证号">
-                <el-input v-model="profileForm.idCard" disabled />
-              </el-form-item>
-              <el-form-item label="地址">
-                <el-input v-model="profileForm.address" type="textarea" :rows="2" />
-              </el-form-item>
-              <el-form-item>
-                <el-button type="primary" @click="saveProfile">保存修改</el-button>
-              </el-form-item>
-            </el-form>
-          </el-tab-pane>
-
-          <el-tab-pane label="账号安全" name="security">
-            <el-form :model="passwordForm" label-width="110px" class="profile-form">
+          <!-- 修改密码 -->
+          <el-card class="password-card" v-if="showPasswordForm">
+            <h3>修改密码</h3>
+            <el-form :model="passwordForm" label-width="80px">
               <el-form-item label="原密码">
-                <el-input v-model="passwordForm.oldPassword" type="password" show-password :prefix-icon="Lock" />
+                <el-input v-model="passwordForm.oldPassword" type="password" show-password />
               </el-form-item>
               <el-form-item label="新密码">
-                <el-input v-model="passwordForm.newPassword" type="password" show-password :prefix-icon="Lock" />
+                <el-input v-model="passwordForm.newPassword" type="password" show-password />
               </el-form-item>
-              <el-form-item label="确认新密码">
-                <el-input v-model="passwordForm.confirmPassword" type="password" show-password :prefix-icon="Lock" />
+              <el-form-item label="确认密码">
+                <el-input v-model="passwordForm.confirmPassword" type="password" show-password />
               </el-form-item>
               <el-form-item>
-                <el-button type="primary" @click="savePassword">修改密码</el-button>
+                <el-button type="primary" :loading="changingPassword" @click="changePassword">确认修改</el-button>
+                <el-button @click="showPasswordForm = false">取消</el-button>
               </el-form-item>
             </el-form>
-          </el-tab-pane>
-        </el-tabs>
-      </section>
+          </el-card>
+
+          <el-button v-else type="warning" @click="showPasswordForm = true">修改密码</el-button>
+        </div>
+
+        <!-- 右侧统计 -->
+        <div class="profile-sidebar">
+          <el-card class="stats-card">
+            <h3>订单统计</h3>
+            <div class="stats-grid">
+              <div class="stat-item">
+                <div class="stat-value">{{ orderStats.total }}</div>
+                <div class="stat-label">全部订单</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value">{{ orderStats.pending }}</div>
+                <div class="stat-label">待处理</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value">{{ orderStats.completed }}</div>
+                <div class="stat-label">已完成</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value">{{ favCount }}</div>
+                <div class="stat-label">收藏房源</div>
+              </div>
+            </div>
+          </el-card>
+
+          <el-card class="logout-card">
+            <el-button type="danger" class="logout-btn" @click="logout">退出登录</el-button>
+          </el-card>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
 .profile-page {
-  max-width: 1180px;
+  max-width: 800px;
   margin: 0 auto;
-  padding: 32px 28px;
+  padding: 24px 20px;
 }
 
-.page-header {
-  margin-bottom: 24px;
-}
-
-.page-header h1 {
-  margin: 0 0 6px;
-  font-size: 28px;
+.page-title {
+  margin: 0 0 24px;
+  font-size: 24px;
   font-weight: 800;
-  letter-spacing: -0.5px;
 }
 
-.page-header p {
+.profile-grid {
+  display: grid;
+  grid-template-columns: 1fr 260px;
+  gap: 20px;
+  align-items: start;
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--c-line);
+}
+
+.profile-avatar {
+  background: linear-gradient(135deg, var(--c-primary), var(--c-primary-dark));
+  color: #fff;
+}
+
+.profile-meta h2 {
+  margin: 0 0 4px;
+  font-size: 20px;
+}
+
+.profile-meta p {
   margin: 0;
   color: var(--c-muted);
-  font-size: 15px;
+  font-size: 14px;
 }
 
-.profile-layout {
-  display: grid;
-  gap: 20px;
-  grid-template-columns: 320px minmax(0, 1fr);
-}
-
-/* Sidebar */
-.profile-sidebar {
-  padding: 32px 24px;
-  text-align: center;
-  background: var(--c-surface);
-  border: 1px solid var(--c-line);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-  height: fit-content;
-}
-
-.avatar-section {
-  margin-bottom: 24px;
-}
-
-.avatar-wrap {
-  position: relative;
-  display: inline-block;
+.profile-info {
   margin-bottom: 16px;
 }
 
-.main-avatar {
-  background: linear-gradient(135deg, var(--c-primary), var(--c-blue));
-  color: #fff;
-  font-size: 36px;
-  box-shadow: 0 4px 16px rgb(13 148 136 / 25%);
-}
-
-.avatar-overlay {
-  position: absolute;
-  right: -2px;
-  bottom: -2px;
-  display: grid;
-  width: 32px;
-  height: 32px;
-  place-items: center;
-  color: #fff;
-  font-size: 14px;
-  background: linear-gradient(135deg, var(--c-primary), var(--c-blue));
-  border: 2px solid #fff;
-  border-radius: 50%;
-  cursor: pointer;
-  transition: transform var(--transition-fast);
-}
-
-.avatar-overlay:hover {
-  transform: scale(1.1);
-}
-
-.avatar-section h3 {
-  margin: 0 0 8px;
-  font-size: 20px;
-  font-weight: 700;
-}
-
-.role-badge {
-  display: inline-block;
-  margin: 0;
-  padding: 4px 14px;
-  color: var(--c-primary);
-  font-size: 12px;
-  font-weight: 600;
-  background: var(--c-primary-bg);
-  border: 1px solid rgb(13 148 136 / 12%);
-  border-radius: 100px;
-}
-
-.profile-stats {
+.info-row {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  padding: 8px 0;
+  font-size: 14px;
+}
+
+.info-row label {
+  width: 60px;
+  color: var(--c-muted);
+  flex-shrink: 0;
+}
+
+.edit-form {
+  margin-top: 8px;
+}
+
+.edit-btn {
+  border-radius: var(--radius-md);
+}
+
+.password-card {
+  margin-top: 16px;
+}
+
+.password-card h3 {
+  margin: 0 0 16px;
+}
+
+.stats-card {
+  margin-bottom: 16px;
+}
+
+.stats-card h3 {
+  margin: 0 0 16px;
+  font-size: 16px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 16px;
-  padding: 20px 0;
-  border-top: 1px solid var(--c-line);
-  border-bottom: 1px solid var(--c-line);
-  margin-bottom: 20px;
 }
 
 .stat-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
+  text-align: center;
+  padding: 12px;
+  background: var(--c-line-light);
+  border-radius: var(--radius-md);
 }
 
-.stat-item strong {
-  font-size: 22px;
+.stat-value {
+  font-size: 28px;
   font-weight: 800;
-  color: var(--c-ink);
+  color: var(--c-primary);
 }
 
-.stat-item span {
-  color: var(--c-muted);
+.stat-label {
   font-size: 12px;
-}
-
-.stat-divider {
-  width: 1px;
-  height: 32px;
-  background: var(--c-line);
-}
-
-.profile-meta {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.meta-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
   color: var(--c-muted);
-  font-size: 13px;
+  margin-top: 4px;
 }
 
-.meta-row .el-icon {
-  font-size: 15px;
-  color: var(--c-muted-light);
+.logout-btn {
+  width: 100%;
+  border-radius: var(--radius-md);
 }
 
-/* Content */
-.profile-content {
-  padding: 24px 28px;
-  background: var(--c-surface);
-  border: 1px solid var(--c-line);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-}
-
-.profile-form {
-  max-width: 480px;
-  padding-top: 8px;
-}
-
-@media (max-width: 860px) {
-  .profile-page {
-    padding: 20px 16px;
-  }
-
-  .profile-layout {
+@media (max-width: 768px) {
+  .profile-grid {
     grid-template-columns: 1fr;
-  }
-
-  .profile-form {
-    max-width: none;
   }
 }
 </style>

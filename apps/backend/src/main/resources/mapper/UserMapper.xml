@@ -5,11 +5,10 @@
     <select id="selectByCondition" resultType="com.example.entity.User">
         SELECT * FROM t_user
         <where>
-            <if test="query.username != null and query.username != ''">
-                AND username LIKE CONCAT('%', #{query.username}, '%')
-            </if>
-            <if test="query.email != null and query.email != ''">
-                AND email LIKE CONCAT('%', #{query.email}, '%')
+            <if test="query.keyword != null and query.keyword != ''">
+                AND (username LIKE CONCAT('%', #{query.keyword}, '%')
+                     OR name LIKE CONCAT('%', #{query.keyword}, '%')
+                     OR phone LIKE CONCAT('%', #{query.keyword}, '%'))
             </if>
             <if test="query.status != null">
                 AND status = #{query.status}

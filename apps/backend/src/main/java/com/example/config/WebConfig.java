@@ -10,6 +10,7 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
@@ -37,7 +38,8 @@ public class WebConfig implements WebMvcConfigurer {
                         "/api/houses/*",
                         "/api/houses/*/availability",
                         "/api/config/cities",
-                        "/api/config/tags"
+                        "/api/config/tags",
+                        "/api/reviews/house/*"
                 );
     }
 
@@ -55,7 +57,8 @@ public class WebConfig implements WebMvcConfigurer {
         if (!dir.isAbsolute()) {
             dir = new File(System.getProperty("user.dir"), uploadDir);
         }
+        String uploadLocation = Path.of(dir.getAbsolutePath()).toUri().toString();
         registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("file:" + dir.getAbsolutePath() + "/");
+                .addResourceLocations(uploadLocation);
     }
 }

@@ -8,6 +8,7 @@ import com.example.entity.Order;
 import com.example.entity.User;
 import com.example.mapper.HouseMapper;
 import com.example.mapper.OrderMapper;
+import com.example.mapper.FavoriteMapper;
 import com.example.mapper.UserMapper;
 import com.example.service.DashboardService;
 import org.springframework.stereotype.Service;
@@ -27,10 +28,14 @@ public class DashboardServiceImpl implements DashboardService {
 
     private final UserMapper userMapper;
 
-    public DashboardServiceImpl(HouseMapper houseMapper, OrderMapper orderMapper, UserMapper userMapper) {
+    private final FavoriteMapper favoriteMapper;
+
+    public DashboardServiceImpl(HouseMapper houseMapper, OrderMapper orderMapper,
+                                UserMapper userMapper, FavoriteMapper favoriteMapper) {
         this.houseMapper = houseMapper;
         this.orderMapper = orderMapper;
         this.userMapper = userMapper;
+        this.favoriteMapper = favoriteMapper;
     }
 
     @Override
@@ -85,6 +90,9 @@ public class DashboardServiceImpl implements DashboardService {
             avgRating = new BigDecimal("5.0");
         }
         dto.setAvgRating(avgRating);
+
+        // 收藏次数
+        dto.setTotalFavorites(Math.toIntExact(favoriteMapper.selectCount(null)));
 
         return dto;
     }

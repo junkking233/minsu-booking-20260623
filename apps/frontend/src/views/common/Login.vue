@@ -79,7 +79,7 @@ async function handleRegister() {
               <rect x="18" y="20" width="4" height="8" rx="1" fill="var(--c-coral)" opacity="0.9"/>
             </svg>
           </div>
-          <h2>欢迎来到<br />民宿预约平台</h2>
+          <h2>欢迎来到<br />栖云智宿</h2>
           <p>精选全国优质民宿，为您提供舒适的住宿体验。无论是周末度假还是长期旅居，都能找到理想温暖的居所。</p>
           <div class="decor-features">
             <div class="decor-feature">

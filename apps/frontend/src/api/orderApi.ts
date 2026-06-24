@@ -1,4 +1,5 @@
 import http from '@/api/http';
+import { formatDateParam } from '@/utils/date';
 
 export interface CreateOrderData {
   houseId: number;
@@ -22,7 +23,11 @@ export interface AdminOrderParams extends OrderQueryParams {
 
 export const orderApi = {
   create(data: CreateOrderData) {
-    return http.post('/orders', data);
+    return http.post('/orders', {
+      ...data,
+      checkIn: formatDateParam(data.checkIn),
+      checkOut: formatDateParam(data.checkOut),
+    });
   },
 
   myOrders(params: OrderQueryParams) {

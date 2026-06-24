@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class FallbackController {
 
-    @RequestMapping("/**")
+    @RequestMapping("/api/**")
     public ResponseEntity<Result<Void>> handleNotFound() {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Result.fail(404, "接口不存在"));

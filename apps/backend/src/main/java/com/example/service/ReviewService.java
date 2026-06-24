@@ -17,4 +17,7 @@ public interface ReviewService {
     void updateStatus(Long reviewId, String status);
 
     void delete(Long reviewId);
+
+    /** 用户端：按房源ID查询可见评价列表 */
+    java.util.List<Review> listByHouse(Long houseId);
 }

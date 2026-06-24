@@ -9,15 +9,19 @@ import com.example.entity.Availability;
 import com.example.entity.Favorite;
 import com.example.entity.House;
 import com.example.entity.Order;
+import com.example.entity.SystemConfig;
 import com.example.exception.BusinessException;
 import com.example.mapper.AvailabilityMapper;
 import com.example.mapper.FavoriteMapper;
 import com.example.mapper.HouseMapper;
 import com.example.mapper.OrderMapper;
+import com.example.mapper.SystemConfigMapper;
 import com.example.service.HouseService;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -35,12 +39,16 @@ public class HouseServiceImpl implements HouseService {
 
     private final FavoriteMapper favoriteMapper;
 
+    private final SystemConfigMapper systemConfigMapper;
+
     public HouseServiceImpl(HouseMapper houseMapper, OrderMapper orderMapper,
-                            AvailabilityMapper availabilityMapper, FavoriteMapper favoriteMapper) {
+                            AvailabilityMapper availabilityMapper, FavoriteMapper favoriteMapper,
+                            SystemConfigMapper systemConfigMapper) {
         this.houseMapper = houseMapper;
         this.orderMapper = orderMapper;
         this.availabilityMapper = availabilityMapper;
         this.favoriteMapper = favoriteMapper;
+        this.systemConfigMapper = systemConfigMapper;
     }
 
     @Override
@@ -110,18 +118,41 @@ public class HouseServiceImpl implements HouseService {
             return result;
         }
 
+        long nights = out.toEpochDay() - in.toEpochDay();
+        int discount = getConfigInt("default_discount", 30);
+        BigDecimal roomFee = house.getPrice().multiply(BigDecimal.valueOf(nights));
+        BigDecimal cleanFee = house.getCleanFee() != null ? house.getCleanFee() : BigDecimal.ZERO;
+        BigDecimal total = roomFee.add(cleanFee).subtract(BigDecimal.valueOf(discount)).max(BigDecimal.ZERO);
+
+        Map<String, Object> priceDetail = new HashMap<>();
+        priceDetail.put("roomFee", roomFee.setScale(2, RoundingMode.HALF_UP));
+        priceDetail.put("cleanFee", cleanFee.setScale(2, RoundingMode.HALF_UP));
+        priceDetail.put("discount", discount);
+        priceDetail.put("total", total.setScale(2, RoundingMode.HALF_UP));
+
         result.put("price", house.getPrice());
-        result.put("cleanFee", house.getCleanFee());
-        result.put("nights", out.toEpochDay() - in.toEpochDay());
+        result.put("cleanFee", cleanFee);
+        result.put("nights", nights);
+        result.put("priceDetail", priceDetail);
         return result;
     }
 
     @Override
-    public IPage<House> adminList(Integer pageNum, Integer pageSize) {
+    public IPage<House> adminList(String keyword, String status, Integer pageNum, Integer pageSize) {
         long pn = pageNum == null ? 1 : pageNum;
         long ps = pageSize == null ? 10 : pageSize;
         Page<House> page = new Page<>(pn, ps);
         QueryWrapper<House> wrapper = new QueryWrapper<>();
+        if (StringUtils.hasText(keyword)) {
+            wrapper.and(w -> w
+                    .like("name", keyword)
+                    .or().like("city", keyword)
+                    .or().like("address", keyword)
+                    .or().like("host", keyword));
+        }
+        if (StringUtils.hasText(status)) {
+            wrapper.eq("status", status);
+        }
         wrapper.orderByDesc("create_time");
         return houseMapper.selectPage(page, wrapper);
     }
@@ -206,5 +237,17 @@ public class HouseServiceImpl implements HouseService {
                 .lt("check_in", checkOut)
                 .gt("check_out", checkIn);
         return orderMapper.selectList(wrapper);
+    }
+
+    private int getConfigInt(String key, int defaultValue) {
+        SystemConfig config = systemConfigMapper.selectById(key);
+        if (config == null || config.getConfigValue() == null) {
+            return defaultValue;
+        }
+        try {
+            return Integer.parseInt(config.getConfigValue().trim());
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
     }
 }

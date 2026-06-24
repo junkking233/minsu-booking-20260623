@@ -13,7 +13,7 @@ public interface OrderService {
 
     Order create(Long userId, OrderCreateRequest request);
 
-    IPage<Order> myOrders(Long userId, String status, Integer page, Integer pageSize);
+    IPage<OrderDetailDto> myOrders(Long userId, String status, Integer page, Integer pageSize);
 
     OrderDetailDto getByOrderNo(Long userId, String orderNo);
 

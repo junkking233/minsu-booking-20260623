@@ -27,10 +27,10 @@ public class OrderController {
     }
 
     @GetMapping("/my")
-    public Result<IPage<Order>> myOrders(@RequestParam(required = false) String status,
-                                          @RequestParam(defaultValue = "1") Integer page,
-                                          @RequestParam(defaultValue = "10") Integer pageSize,
-                                          HttpServletRequest httpRequest) {
+    public Result<IPage<OrderDetailDto>> myOrders(@RequestParam(required = false) String status,
+                                                   @RequestParam(defaultValue = "1") Integer page,
+                                                   @RequestParam(defaultValue = "10") Integer pageSize,
+                                                   HttpServletRequest httpRequest) {
         return Result.ok(orderService.myOrders(currentUser(httpRequest).getUserId(), status, page, pageSize));
     }
 

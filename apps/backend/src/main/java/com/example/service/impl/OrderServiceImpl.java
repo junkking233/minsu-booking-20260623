@@ -24,7 +24,11 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -99,7 +103,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public IPage<Order> myOrders(Long userId, String status, Integer pageNum, Integer pageSize) {
+    public IPage<OrderDetailDto> myOrders(Long userId, String status, Integer pageNum, Integer pageSize) {
         long pn = pageNum == null ? 1 : pageNum;
         long ps = pageSize == null ? 10 : pageSize;
         Page<Order> page = new Page<>(pn, ps);
@@ -109,7 +113,28 @@ public class OrderServiceImpl implements OrderService {
             wrapper.eq("status", status);
         }
         wrapper.orderByDesc("create_time");
-        return orderMapper.selectPage(page, wrapper);
+        IPage<Order> orderPage = orderMapper.selectPage(page, wrapper);
+        List<Order> records = orderPage.getRecords();
+        Map<Long, House> loadedHouseMap = Collections.emptyMap();
+        if (records != null && !records.isEmpty()) {
+            List<Long> houseIds = records.stream()
+                    .map(Order::getHouseId)
+                    .filter(id -> id != null)
+                    .distinct()
+                    .toList();
+            if (!houseIds.isEmpty()) {
+                loadedHouseMap = houseMapper.selectBatchIds(houseIds)
+                        .stream()
+                        .collect(Collectors.toMap(House::getId, Function.identity(), (a, b) -> a));
+            }
+        }
+
+        Map<Long, House> houseMap = loadedHouseMap;
+        Page<OrderDetailDto> dtoPage = new Page<>(orderPage.getCurrent(), orderPage.getSize(), orderPage.getTotal());
+        dtoPage.setRecords(records == null ? Collections.emptyList() : records.stream()
+                .map(order -> OrderDetailDto.from(order, houseMap.get(order.getHouseId()), null))
+                .toList());
+        return dtoPage;
     }
 
     @Override
@@ -138,12 +163,27 @@ public class OrderServiceImpl implements OrderService {
         if (!order.getUserId().equals(userId)) {
             throw new BusinessException(403, "无权操作该订单");
         }
-        if (!"WAIT_PAY".equals(order.getStatus())) {
+        if (!"PENDING".equals(order.getStatus())
+                && !"WAIT_PAY".equals(order.getStatus())
+                && !"BOOKED".equals(order.getStatus())) {
             throw new BusinessException(400, "当前状态不允许取消");
         }
+        if ("BOOKED".equals(order.getStatus())) {
+            int freeCancelHours = getConfigInt("free_cancel_hours", 24);
+            LocalDateTime freeCancelDeadline = order.getCheckIn().atStartOfDay().minusHours(freeCancelHours);
+            if (LocalDateTime.now().isAfter(freeCancelDeadline)) {
+                throw new BusinessException(400, "已超过免费取消时限，请联系管理员处理");
+            }
+        }
 
-        order.setStatus("CANCELLED");
-        orderMapper.updateById(order);
+        Order update = new Order();
+        update.setOrderNo(orderNo);
+        update.setStatus("CANCELLED");
+        // 取消订单时重置 paid 标记（已预订状态取消需回退 paid）
+        if ("BOOKED".equals(order.getStatus())) {
+            update.setPaid(0);
+        }
+        orderMapper.updateById(update);
     }
 
     @Override
@@ -269,6 +309,12 @@ public class OrderServiceImpl implements OrderService {
         Order update = new Order();
         update.setOrderNo(orderNo);
         update.setStatus(status);
+        // 按需求同步 paid 标记：进入已预订/入住中/已完成/已评价 → paid=true；
+        // 进入已取消/已退款 → paid=false
+        switch (status) {
+            case "BOOKED", "CHECKED_IN", "COMPLETED", "REVIEWED" -> update.setPaid(1);
+            case "CANCELLED", "REFUNDED" -> update.setPaid(0);
+        }
         orderMapper.updateById(update);
     }
 

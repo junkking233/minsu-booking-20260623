@@ -9,6 +9,7 @@ import { houseApi } from '@/api/houseApi';
 import { favoriteApi } from '@/api/favoriteApi';
 import { reviewApi } from '@/api/reviewApi';
 import { getCurrentUser } from '@/utils/auth';
+import { formatDateParam } from '@/utils/date';
 
 const route = useRoute();
 const router = useRouter();
@@ -34,8 +35,8 @@ const loading = ref(true);
 const favorited = ref(false);
 const reviews = ref<ReviewItem[]>([]);
 
-const checkIn = ref((route.query.checkIn as string) || '');
-const checkOut = ref((route.query.checkOut as string) || '');
+const checkIn = ref(formatDateParam(route.query.checkIn));
+const checkOut = ref(formatDateParam(route.query.checkOut));
 const guests = ref(Number(route.query.guests) || 1);
 
 const nights = computed(() => {
@@ -51,8 +52,8 @@ async function loadDetail() {
   loading.value = true;
   try {
     const params: Record<string, string> = {};
-    if (checkIn.value) params.checkIn = checkIn.value;
-    if (checkOut.value) params.checkOut = checkOut.value;
+    if (checkIn.value) params.checkIn = formatDateParam(checkIn.value);
+    if (checkOut.value) params.checkOut = formatDateParam(checkOut.value);
     const data = await houseApi.getDetail(houseId, params) as HouseDetail;
     house.value = data;
     favorited.value = data.favorited || false;
@@ -66,8 +67,8 @@ async function loadDetail() {
 function goBooking() {
   if (!currentUser) { ElMessage.warning('请先登录'); router.push('/login'); return; }
   const query: Record<string, string> = {};
-  if (checkIn.value) query.checkIn = checkIn.value;
-  if (checkOut.value) query.checkOut = checkOut.value;
+  if (checkIn.value) query.checkIn = formatDateParam(checkIn.value);
+  if (checkOut.value) query.checkOut = formatDateParam(checkOut.value);
   if (guests.value > 1) query.guests = String(guests.value);
   router.push({ path: `/portal/booking/${houseId}`, query });
 }
@@ -80,6 +81,13 @@ async function toggleFavorite() {
   } catch (e) { ElMessage.error(e instanceof Error ? e.message : '操作失败'); }
 }
 
+function usePlaceholder(e: Event) {
+  const img = e.target as HTMLImageElement;
+  if (!img.src.endsWith('/placeholder.svg')) {
+    img.src = '/placeholder.svg';
+  }
+}
+
 onMounted(loadDetail);
 </script>
 
@@ -89,14 +97,14 @@ onMounted(loadDetail);
       <!-- ====== 图片画廊 ====== -->
       <div class="gallery">
         <div class="gallery-main">
-          <img :src="house.coverImage || '/placeholder.svg'" :alt="house.name" />
+          <img :src="house.coverImage || '/placeholder.svg'" :alt="house.name" @error="usePlaceholder" />
         </div>
         <div class="gallery-side">
           <div class="gallery-thumb">
-            <img :src="house.coverImage || '/placeholder.svg'" alt="" />
+            <img :src="house.coverImage || '/placeholder.svg'" alt="" @error="usePlaceholder" />
           </div>
           <div class="gallery-thumb">
-            <img :src="house.coverImage || '/placeholder.svg'" alt="" />
+            <img :src="house.coverImage || '/placeholder.svg'" alt="" @error="usePlaceholder" />
           </div>
         </div>
         <div class="gallery-fav" :class="{ favorited }" @click="toggleFavorite">
@@ -216,12 +224,12 @@ onMounted(loadDetail);
               <div class="date-group">
                 <div class="date-field">
                   <label>入住</label>
-                  <el-date-picker v-model="checkIn" type="date" placeholder="选择日期" class="date-input" :disabled-date="(d: Date) => d.getTime() < Date.now() - 86400000" />
+                  <el-date-picker v-model="checkIn" type="date" value-format="YYYY-MM-DD" placeholder="选择日期" class="date-input" :disabled-date="(d: Date) => d.getTime() < Date.now() - 86400000" />
                 </div>
                 <span class="date-arrow">→</span>
                 <div class="date-field">
                   <label>离店</label>
-                  <el-date-picker v-model="checkOut" type="date" placeholder="选择日期" class="date-input" :disabled-date="(d: Date) => !checkIn || d.getTime() <= new Date(checkIn).getTime()" />
+                  <el-date-picker v-model="checkOut" type="date" value-format="YYYY-MM-DD" placeholder="选择日期" class="date-input" :disabled-date="(d: Date) => !checkIn || d.getTime() <= new Date(checkIn).getTime()" />
                 </div>
               </div>
               <div class="guests-field">
@@ -458,10 +466,29 @@ onMounted(loadDetail);
   display: block; font-size: 12px; font-weight: 600;
   color: var(--c-muted); margin-bottom: 5px; letter-spacing: 0.2px;
 }
-.date-group { display: flex; align-items: center; gap: 6px; }
-.date-field { flex: 1; min-width: 100px; }
-.date-input { width: 100%; min-width: 100px; }
-.date-arrow { color: var(--c-muted-light); font-size: 14px; padding-top: 20px; flex-shrink: 0; }
+.date-group {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 12px minmax(0, 1fr);
+  align-items: end;
+  gap: 6px;
+}
+.date-field { min-width: 0; }
+.date-input {
+  width: 100% !important;
+  min-width: 0;
+}
+.date-input :deep(.el-input__wrapper) {
+  padding: 0 8px;
+}
+.date-input :deep(.el-input__inner) {
+  min-width: 0;
+}
+.date-arrow {
+  color: var(--c-muted-light);
+  font-size: 13px;
+  line-height: 32px;
+  text-align: center;
+}
 .guests-input { width: 100%; }
 
 .booking-summary { margin-bottom: 20px; }
@@ -516,6 +543,8 @@ onMounted(loadDetail);
   .gallery { height: 240px; grid-template-columns: 1fr; }
   .gallery-side { display: none; }
   .booking-card { position: static; }
+  .date-group { grid-template-columns: 1fr; }
+  .date-arrow { display: none; }
   .facilities-grid { grid-template-columns: repeat(2, 1fr); }
 }
 </style>

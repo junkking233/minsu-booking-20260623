@@ -18,9 +18,11 @@ public class AdminHouseController {
     }
 
     @GetMapping("/houses")
-    public Result<IPage<House>> list(@RequestParam(defaultValue = "1") Integer page,
+    public Result<IPage<House>> list(@RequestParam(required = false) String keyword,
+                                     @RequestParam(required = false) String status,
+                                     @RequestParam(defaultValue = "1") Integer page,
                                      @RequestParam(defaultValue = "10") Integer pageSize) {
-        return Result.ok(houseService.adminList(page, pageSize));
+        return Result.ok(houseService.adminList(keyword, status, page, pageSize));
     }
 
     @PostMapping("/houses")

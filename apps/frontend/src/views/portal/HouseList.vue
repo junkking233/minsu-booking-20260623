@@ -7,6 +7,7 @@ import { houseApi, type HouseSearchParams } from '@/api/houseApi';
 import { configApi } from '@/api/configApi';
 import { favoriteApi } from '@/api/favoriteApi';
 import { getCurrentUser } from '@/utils/auth';
+import { formatDateParam } from '@/utils/date';
 import HouseCard from '@/components/common/HouseCard.vue';
 import EmptyState from '@/components/common/EmptyState.vue';
 
@@ -51,8 +52,8 @@ const typeOptions = [
 function parseQuery() {
   const q = route.query;
   if (q.city) filters.city = String(q.city);
-  if (q.checkIn) filters.checkIn = String(q.checkIn);
-  if (q.checkOut) filters.checkOut = String(q.checkOut);
+  if (q.checkIn) filters.checkIn = formatDateParam(q.checkIn);
+  if (q.checkOut) filters.checkOut = formatDateParam(q.checkOut);
   if (q.guests) filters.guests = Number(q.guests);
   if (q.keyword) filters.keyword = String(q.keyword);
 }
@@ -66,8 +67,8 @@ async function search() {
     if (filters.type) params.type = filters.type;
     if (filters.minPrice != null) params.minPrice = filters.minPrice;
     if (filters.maxPrice != null) params.maxPrice = filters.maxPrice;
-    if (filters.checkIn) params.checkIn = filters.checkIn;
-    if (filters.checkOut) params.checkOut = filters.checkOut;
+    if (filters.checkIn) params.checkIn = formatDateParam(filters.checkIn);
+    if (filters.checkOut) params.checkOut = formatDateParam(filters.checkOut);
     if (filters.guests) params.guests = filters.guests;
     if (filters.sort) params.sort = filters.sort;
     const data = await houseApi.search(params) as { records: HouseItem[]; total: number };
@@ -80,15 +81,15 @@ async function search() {
 
 function goDetail(id: number | string) {
   const query: Record<string, string> = {};
-  if (filters.checkIn) query.checkIn = filters.checkIn;
-  if (filters.checkOut) query.checkOut = filters.checkOut;
+  if (filters.checkIn) query.checkIn = formatDateParam(filters.checkIn);
+  if (filters.checkOut) query.checkOut = formatDateParam(filters.checkOut);
   router.push({ path: `/portal/houses/${id}`, query });
 }
 function goBooking(house: any) {
   if (!currentUser) { ElMessage.warning('请先登录'); router.push('/login'); return; }
   const query: Record<string, string> = {};
-  if (filters.checkIn) query.checkIn = filters.checkIn;
-  if (filters.checkOut) query.checkOut = filters.checkOut;
+  if (filters.checkIn) query.checkIn = formatDateParam(filters.checkIn);
+  if (filters.checkOut) query.checkOut = formatDateParam(filters.checkOut);
   if (filters.guests) query.guests = String(filters.guests);
   router.push({ path: `/portal/booking/${house.id}`, query });
 }
@@ -126,8 +127,8 @@ onMounted(async () => {
           <el-select v-model="filters.type" placeholder="房型" clearable class="filter-sel" @change="search">
             <el-option v-for="t in typeOptions" :key="t.value" :label="t.label" :value="t.value" />
           </el-select>
-          <el-date-picker v-model="filters.checkIn" type="date" placeholder="入住" class="filter-date" @change="search" />
-          <el-date-picker v-model="filters.checkOut" type="date" placeholder="离店" class="filter-date" @change="search" />
+          <el-date-picker v-model="filters.checkIn" type="date" value-format="YYYY-MM-DD" placeholder="入住" class="filter-date" @change="search" />
+          <el-date-picker v-model="filters.checkOut" type="date" value-format="YYYY-MM-DD" placeholder="离店" class="filter-date" @change="search" />
           <el-input-number v-model="filters.guests" :min="1" placeholder="人数" class="filter-num" @change="search" />
           <el-select v-model="filters.sort" class="filter-sort">
             <el-option v-for="s in sortOptions" :key="s.value" :label="s.label" :value="s.value" />

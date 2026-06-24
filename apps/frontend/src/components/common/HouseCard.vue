@@ -57,6 +57,12 @@ const displayPrice = computed(() => Number(props.house.price).toFixed(0));
 function handleClick() { emit('click', props.house.id); }
 function handleBook(e: Event) { e.stopPropagation(); emit('book', props.house); }
 function handleFavorite(e: Event) { e.stopPropagation(); emit('toggleFavorite', props.house, props.favorited); }
+function usePlaceholder(e: Event) {
+  const img = e.target as HTMLImageElement;
+  if (!img.src.endsWith('/placeholder.svg')) {
+    img.src = '/placeholder.svg';
+  }
+}
 </script>
 
 <template>
@@ -67,7 +73,7 @@ function handleFavorite(e: Event) { e.stopPropagation(); emit('toggleFavorite', 
   >
     <!-- 封面图 -->
     <div class="house-cover" :style="{ height: coverHeight }">
-      <img :src="coverUrl" :alt="house.name" loading="lazy" />
+      <img :src="coverUrl" :alt="house.name" loading="lazy" @error="usePlaceholder" />
 
       <!-- 类型标签 -->
       <span v-if="house.type" class="cover-badge type-badge">{{ house.type }}</span>

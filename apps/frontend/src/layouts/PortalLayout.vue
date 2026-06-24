@@ -58,7 +58,7 @@ function logout() {
               </defs>
             </svg>
           </div>
-          <span class="brand-text">民宿预约</span>
+          <span class="brand-text">栖云智宿</span>
         </div>
 
         <el-menu :default-active="activeMenu" mode="horizontal" class="portal-menu" router>
@@ -121,7 +121,7 @@ function logout() {
                   </linearGradient>
                 </defs>
               </svg>
-              <span>民宿预约</span>
+              <span>栖云智宿</span>
             </div>
             <p class="footer-desc">发现美好住宿体验，精选品质民宿，让每一次旅行都充满期待。</p>
           </div>
@@ -141,7 +141,7 @@ function logout() {
           </div>
         </div>
         <div class="footer-bottom">
-          <span>&copy; 2026 民宿预约管理系统 All Rights Reserved</span>
+          <span>&copy; 2026 栖云智宿 All Rights Reserved</span>
         </div>
       </div>
     </footer>
@@ -179,7 +179,6 @@ function logout() {
     radial-gradient(ellipse 80% 60% at 10% 0%, rgb(2 132 199 / 4%), transparent),
     radial-gradient(ellipse 60% 50% at 90% 100%, rgb(234 115 86 / 3%), transparent),
     var(--c-bg);
-  padding-bottom: 70px;
 }
 
 /* Header */
@@ -288,6 +287,7 @@ function logout() {
 
 /* Footer */
 .portal-footer {
+  flex-shrink: 0;
   padding: 0;
   background: linear-gradient(180deg, #0f1a2b 0%, #0f172a 100%);
   color: #94a3b8;

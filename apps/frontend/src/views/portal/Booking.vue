@@ -5,6 +5,7 @@ import { ElMessage } from 'element-plus';
 import { Lock } from '@element-plus/icons-vue';
 import { houseApi } from '@/api/houseApi';
 import { orderApi } from '@/api/orderApi';
+import { formatDateParam } from '@/utils/date';
 
 const route = useRoute();
 const router = useRouter();
@@ -33,21 +34,62 @@ const house = ref<HouseInfo | null>(null);
 const loading = ref(false);
 const submitting = ref(false);
 const availability = ref<{ available: boolean; nights: number; priceDetail: PriceDetail } | null>(null);
+const availabilityMessage = ref('');
 
 const form = ref({
-  checkIn: (route.query.checkIn as string) || '',
-  checkOut: (route.query.checkOut as string) || '',
+  checkIn: formatDateParam(route.query.checkIn),
+  checkOut: formatDateParam(route.query.checkOut),
   guests: Number(route.query.guests) || 1,
   guestName: '',
   phone: '',
   note: '',
 });
 
+function todayStart() {
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  return now;
+}
+
+function normalizeAvailability(data: any) {
+  const nights = Number(data.nights || 0);
+  const roomFee = Number(data.priceDetail?.roomFee ?? (data.price || 0) * nights);
+  const cleanFee = Number(data.priceDetail?.cleanFee ?? data.cleanFee ?? 0);
+  const discount = Number(data.priceDetail?.discount ?? 0);
+  const total = Number(data.priceDetail?.total ?? Math.max(roomFee + cleanFee - discount, 0));
+  return {
+    available: Boolean(data.available),
+    nights,
+    priceDetail: { roomFee, cleanFee, discount, total },
+  };
+}
+
+function isValidDateRange() {
+  if (!form.value.checkIn || !form.value.checkOut) {
+    availabilityMessage.value = '';
+    return false;
+  }
+  const checkIn = new Date(form.value.checkIn);
+  const checkOut = new Date(form.value.checkOut);
+  if (checkIn < todayStart()) {
+    availabilityMessage.value = '入住日期不能早于今天';
+    availability.value = null;
+    return false;
+  }
+  if (checkOut <= checkIn) {
+    availabilityMessage.value = '离店日期必须晚于入住日期';
+    availability.value = null;
+    return false;
+  }
+  return true;
+}
+
 async function loadHouse() {
   loading.value = true;
   try {
     const data = await houseApi.getDetail(houseId) as HouseInfo;
     house.value = data;
+    await checkAvailability();
   } catch (e) {
     ElMessage.error('加载房源信息失败');
   } finally {
@@ -57,16 +99,19 @@ async function loadHouse() {
 
 async function checkAvailability() {
   if (!form.value.checkIn || !form.value.checkOut || !form.value.guests) return;
+  if (!isValidDateRange()) return;
   try {
     const data = await houseApi.checkAvailability(houseId, {
-      checkIn: form.value.checkIn,
-      checkOut: form.value.checkOut,
+      checkIn: formatDateParam(form.value.checkIn),
+      checkOut: formatDateParam(form.value.checkOut),
       guests: form.value.guests,
     }) as any;
-    availability.value = data;
+    availability.value = normalizeAvailability(data);
+    availabilityMessage.value = data.message || (availability.value.available ? '' : '该时段不可预订');
   } catch (e) {
     availability.value = null;
-    ElMessage.error(e instanceof Error ? e.message : '校验失败');
+    availabilityMessage.value = e instanceof Error ? e.message : '校验失败';
+    ElMessage.error(availabilityMessage.value);
   }
 }
 
@@ -83,12 +128,23 @@ async function submitOrder() {
     ElMessage.warning('请选择入住和离店日期');
     return;
   }
+  if (!isValidDateRange()) {
+    ElMessage.warning(availabilityMessage.value);
+    return;
+  }
+  if (!availability.value) {
+    await checkAvailability();
+  }
+  if (!availability.value?.available) {
+    ElMessage.warning(availabilityMessage.value || '该时段不可预订');
+    return;
+  }
   submitting.value = true;
   try {
     const result = await orderApi.create({
       houseId,
-      checkIn: form.value.checkIn,
-      checkOut: form.value.checkOut,
+      checkIn: formatDateParam(form.value.checkIn),
+      checkOut: formatDateParam(form.value.checkOut),
       guests: form.value.guests,
       guestName: form.value.guestName,
       phone: form.value.phone,
@@ -136,8 +192,10 @@ onMounted(loadHouse);
                     <el-date-picker
                       v-model="form.checkIn"
                       type="date"
+                      value-format="YYYY-MM-DD"
                       placeholder="选择入住日期"
                       style="width: 100%"
+                      :disabled-date="(d: Date) => d.getTime() < todayStart().getTime()"
                       @change="checkAvailability"
                     />
                   </el-form-item>
@@ -147,8 +205,10 @@ onMounted(loadHouse);
                     <el-date-picker
                       v-model="form.checkOut"
                       type="date"
+                      value-format="YYYY-MM-DD"
                       placeholder="选择离店日期"
                       style="width: 100%"
+                      :disabled-date="(d: Date) => !form.checkIn || d.getTime() <= new Date(form.checkIn).getTime()"
                       @change="checkAvailability"
                     />
                   </el-form-item>
@@ -199,11 +259,11 @@ onMounted(loadHouse);
               </div>
             </template>
             <div v-else class="price-empty">
-              请选择日期和人数后查看费用
+              {{ availabilityMessage || '请选择日期和人数后查看费用' }}
             </div>
 
             <div class="price-hint" v-if="availability && !availability.available">
-              该时段不可预订
+              {{ availabilityMessage || '该时段不可预订' }}
             </div>
 
             <el-button

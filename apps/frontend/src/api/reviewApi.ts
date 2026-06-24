@@ -23,6 +23,11 @@ export const reviewApi = {
     return http.post('/reviews', data);
   },
 
+  /** 用户端：查询指定房源的可见评价列表 */
+  listByHouse(houseId: number) {
+    return http.get(`/reviews/house/${houseId}`);
+  },
+
   adminList(params: AdminReviewParams) {
     return http.get('/admin/reviews', { params });
   },

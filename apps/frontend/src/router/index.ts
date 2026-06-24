@@ -145,7 +145,7 @@ const router = createRouter({
 });
 
 router.beforeEach((to, _from, next) => {
-  document.title = to.meta.title ? `${to.meta.title} - 民宿预约` : '民宿预约';
+  document.title = to.meta.title ? `${to.meta.title} - 栖云智宿` : '栖云智宿';
 
   const currentUser = getCurrentUser();
 

@@ -2,6 +2,7 @@
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElMessage, ElMessageBox } from 'element-plus';
+import { Calendar, House, Location, User } from '@element-plus/icons-vue';
 import { orderApi } from '@/api/orderApi';
 import EmptyState from '@/components/common/EmptyState.vue';
 
@@ -44,6 +45,45 @@ const statusActions: Record<string, { label: string; action: string; type: strin
   BOOKED: [{ label: '取消', action: 'cancel', type: 'danger' }],
   COMPLETED: [{ label: '评价', action: 'review', type: 'primary' }],
 };
+
+const statusNameMap: Record<string, string> = {
+  PENDING: '待确认',
+  WAIT_PAY: '待支付',
+  BOOKED: '已预订',
+  CHECKED_IN: '入住中',
+  COMPLETED: '已完成',
+  REVIEWED: '已评价',
+  CANCELLED: '已取消',
+  REFUNDING: '退款中',
+  REFUNDED: '已退款',
+};
+
+function displayStatus(order: OrderItem) {
+  return order.statusName || statusNameMap[order.status] || '订单';
+}
+
+function displayTitle(order: OrderItem) {
+  return order.houseName || '房源信息待同步';
+}
+
+function displayCity(order: OrderItem) {
+  return order.houseCity || '城市待补充';
+}
+
+function displayDate(date?: string) {
+  return date ? date.slice(5, 10).replace('-', '.') : '--';
+}
+
+function displayAmount(amount: number) {
+  return Number(amount || 0).toFixed(0);
+}
+
+function usePlaceholder(e: Event) {
+  const img = e.target as HTMLImageElement;
+  if (!img.src.endsWith('/placeholder.svg')) {
+    img.src = '/placeholder.svg';
+  }
+}
 
 async function loadOrders() {
   loading.value = true;
@@ -117,37 +157,72 @@ onMounted(loadOrders);
         >
           <div class="order-status-bar"></div>
           <div class="order-body">
-            <div class="order-top">
-              <img :src="order.houseCoverImage || '/placeholder.svg'" class="order-img" />
+            <div class="order-main">
+              <div class="cover-wrap">
+                <img
+                  :src="order.houseCoverImage || '/placeholder.svg'"
+                  :alt="displayTitle(order)"
+                  class="order-img"
+                  loading="lazy"
+                  @error="usePlaceholder"
+                />
+              </div>
+
               <div class="order-info">
-                <h4>{{ order.houseName }}</h4>
-                <div class="order-meta">
-                  <span>{{ order.houseCity }}</span>
-                  <span class="meta-sep">·</span>
-                  <span>{{ order.checkIn?.slice(5) }} ~ {{ order.checkOut?.slice(5) }}</span>
-                  <span class="meta-sep">·</span>
-                  <span>{{ order.nights }} 晚</span>
-                  <span class="meta-sep">·</span>
-                  <span>{{ order.guests }} 人</span>
+                <div class="order-heading">
+                  <div class="title-area">
+                    <h4>{{ displayTitle(order) }}</h4>
+                    <div class="order-no">订单号 {{ order.orderNo }}</div>
+                  </div>
+                  <el-tag size="small" effect="plain" :type="order.status === 'WAIT_PAY' ? 'danger' : order.status === 'CHECKED_IN' ? 'success' : order.status === 'REVIEWED' ? 'success' : order.status === 'CANCELLED' ? 'info' : ''">
+                    {{ displayStatus(order) }}
+                  </el-tag>
+                </div>
+
+                <div class="order-meta-grid">
+                  <div class="meta-item">
+                    <el-icon><Location /></el-icon>
+                    <span>{{ displayCity(order) }}</span>
+                  </div>
+                  <div class="meta-item">
+                    <el-icon><Calendar /></el-icon>
+                    <span>{{ displayDate(order.checkIn) }} - {{ displayDate(order.checkOut) }}</span>
+                  </div>
+                  <div class="meta-item">
+                    <el-icon><User /></el-icon>
+                    <span>{{ order.nights || 0 }} 晚 · {{ order.guests || 1 }} 人</span>
+                  </div>
+                  <div class="meta-item">
+                    <el-icon><House /></el-icon>
+                    <span>房源详情</span>
+                  </div>
                 </div>
               </div>
+
               <div class="order-right">
-                <el-tag size="small" :type="order.status === 'WAIT_PAY' ? 'danger' : order.status === 'CHECKED_IN' ? 'success' : order.status === 'REVIEWED' ? 'success' : order.status === 'CANCELLED' ? 'info' : ''">
-                  {{ order.statusName }}
-                </el-tag>
-                <div class="order-amount text-price">&yen;{{ order.amount }}</div>
-                <div class="order-no">{{ order.orderNo }}</div>
+                <div class="amount-label">订单金额</div>
+                <div class="order-amount text-price">&yen;{{ displayAmount(order.amount) }}</div>
+                <div class="order-actions" @click.stop>
+                  <template v-if="statusActions[order.status]">
+                    <el-button
+                      v-for="a in statusActions[order.status]"
+                      :key="a.action" :type="a.type as any"
+                      :plain="a.action === 'cancel'"
+                      size="small"
+                      @click="doAction(order.orderNo, a.action)"
+                    >{{ a.label }}</el-button>
+                  </template>
+                  <el-button size="small" @click="goDetail(order.orderNo)">详情</el-button>
+                </div>
               </div>
             </div>
 
-            <div class="order-actions" v-if="statusActions[order.status]" @click.stop>
-              <el-button
-                v-for="a in statusActions[order.status]"
-                :key="a.action" :type="a.type as any"
-                size="small"
-                @click="doAction(order.orderNo, a.action)"
-              >{{ a.label }}</el-button>
-              <el-button size="small" @click="goDetail(order.orderNo)">详情</el-button>
+            <div class="order-footer">
+              <span>创建时间 {{ order.createTime || '--' }}</span>
+              <div class="footer-link">
+                <span>查看订单</span>
+                <span class="arrow">›</span>
+              </div>
             </div>
           </div>
         </div>
@@ -169,7 +244,7 @@ onMounted(loadOrders);
 </template>
 
 <style scoped>
-.orders-page { max-width: 900px; margin: 0 auto; padding: 24px 20px; }
+.orders-page { max-width: 960px; margin: 0 auto; padding: 24px 20px; }
 
 .page-header { margin-bottom: 20px; display: flex; align-items: flex-end; justify-content: space-between; }
 .page-title { margin: 0 0 4px; font-size: 26px; font-weight: 800; letter-spacing: -0.5px; color: var(--c-ink); }
@@ -193,9 +268,10 @@ onMounted(loadOrders);
 }
 
 /* Order Cards */
-.order-list { display: flex; flex-direction: column; gap: 14px; }
+.order-list { display: flex; flex-direction: column; gap: 16px; }
 .order-card {
-  position: relative; display: flex;
+  position: relative;
+  display: flex;
   background: var(--c-surface); border: 1px solid rgb(229 232 236 / 70%);
   border-radius: var(--radius-lg); overflow: hidden;
   cursor: pointer; transition: all var(--transition-base);
@@ -217,37 +293,164 @@ onMounted(loadOrders);
 .s-refunded .order-status-bar { background: var(--c-muted-light); }
 .s-refunding .order-status-bar { background: var(--c-amber); }
 
-.order-body { flex: 1; padding: 16px 18px; min-width: 0; }
+.order-body { flex: 1; padding: 20px 22px 14px; min-width: 0; }
 
-.order-top { display: flex; gap: 16px; align-items: center; }
-.order-img {
-  width: 100px; height: 80px;
-  object-fit: cover; border-radius: var(--radius-sm); flex-shrink: 0;
+.order-main {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr) 148px;
+  gap: 16px;
+  align-items: stretch;
 }
-.order-info { flex: 1; min-width: 0; }
+.cover-wrap {
+  position: relative;
+  width: 96px;
+  height: 72px;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  background: var(--c-line-light);
+  border: 1px solid rgb(229 232 236 / 80%);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 60%);
+}
+.order-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform var(--transition-base);
+}
+.order-card:hover .order-img { transform: scale(1.04); }
+.order-info {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 14px;
+}
+.order-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+.title-area { min-width: 0; }
 .order-info h4 {
-  margin: 0 0 6px; font-size: 15px; font-weight: 600; color: var(--c-ink);
+  margin: 0 0 6px;
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--c-ink);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.order-meta { display: flex; flex-wrap: wrap; gap: 2px; font-size: 13px; color: var(--c-muted); }
-.meta-sep { color: var(--c-muted-light); }
-
-.order-right { text-align: right; flex-shrink: 0; }
-.order-amount {
-  font-size: 20px; font-weight: 700; margin-top: 6px;
+.order-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
 }
-.order-no { font-size: 12px; color: var(--c-muted-light); margin-top: 2px; }
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 8px 9px;
+  background: var(--c-line-light);
+  border-radius: var(--radius-sm);
+}
+.meta-item .el-icon {
+  flex: 0 0 auto;
+  font-size: 14px;
+  color: var(--c-muted);
+}
+.meta-item span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--c-ink-light);
+}
 
+.order-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+  padding-left: 18px;
+  text-align: right;
+  flex-shrink: 0;
+  border-left: 1px solid var(--c-line-light);
+}
+.order-amount {
+  font-size: 24px; font-weight: 800; line-height: 1.1;
+  color: var(--c-price);
+}
+.amount-label {
+  font-size: 12px;
+  color: var(--c-muted);
+}
+.order-no {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  color: var(--c-muted-light);
+}
+
+.order-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 18px;
+  padding-top: 12px;
+  border-top: 1px solid var(--c-line-light);
+  font-size: 12px;
+  color: var(--c-muted-light);
+}
 .order-actions {
-  display: flex; gap: 8px; margin-top: 14px; padding-top: 14px;
-  border-top: 1px solid var(--c-line-light); justify-content: flex-end;
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+.order-actions :deep(.el-button + .el-button) {
+  margin-left: 0;
+}
+.footer-link {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--c-primary);
+  font-weight: 600;
+}
+.arrow {
+  font-size: 18px;
+  line-height: 1;
 }
 
 @media (max-width: 640px) {
-  .order-top { flex-direction: column; align-items: flex-start; }
-  .order-img { width: 100%; height: 140px; }
+  .order-main { grid-template-columns: 1fr; align-items: flex-start; }
+  .cover-wrap { width: 100%; height: 150px; }
+  .order-meta-grid { grid-template-columns: 1fr 1fr; width: 100%; }
   .order-right {
-    width: 100%; display: flex; justify-content: space-between; align-items: center;
+    width: 100%;
+    align-items: flex-start;
+    padding-left: 0;
+    border-left: 0;
+    text-align: left;
+  }
+  .order-footer {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .order-actions {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
   }
 }
 </style>

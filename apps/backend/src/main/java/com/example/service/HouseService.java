@@ -15,7 +15,7 @@ public interface HouseService {
 
     Map<String, Object> checkAvailability(Long houseId, String checkIn, String checkOut);
 
-    IPage<House> adminList(Integer page, Integer pageSize);
+    IPage<House> adminList(String keyword, String status, Integer page, Integer pageSize);
 
     House create(HouseSaveRequest request);
 

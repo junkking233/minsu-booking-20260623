@@ -57,6 +57,10 @@ const statusColors: Record<string, string> = {
 
 const currentStep = ref(-1);
 
+function hasActions(status: string) {
+  return status === 'PENDING' || status === 'WAIT_PAY' || status === 'BOOKED' || status === 'COMPLETED';
+}
+
 async function loadOrder() {
   loading.value = true;
   try {
@@ -189,23 +193,26 @@ onMounted(loadOrder);
             <div class="amount-label">订单金额</div>
             <div class="amount-value">&yen;{{ order.amount }}</div>
             <div class="amount-meta">
-              <span>已支付：</span>
-              <el-tag :type="order.paid ? 'success' : 'info'" size="small">
-                {{ order.paid ? '是' : '否' }}
-              </el-tag>
+              <span class="paid-label">支付状态</span>
+              <span class="paid-pill" :class="{ paid: order.paid }">
+                {{ order.paid ? '已支付' : '未支付' }}
+              </span>
             </div>
           </el-card>
 
-          <el-card class="action-card">
-            <template v-if="order.status === 'PENDING' || order.status === 'WAIT_PAY' || order.status === 'BOOKED'">
-              <el-button type="danger" class="action-btn" @click="handleCancel">取消订单</el-button>
-            </template>
-            <template v-if="order.status === 'WAIT_PAY'">
-              <el-button type="primary" class="action-btn" @click="handlePay">去支付</el-button>
-            </template>
-            <template v-if="order.status === 'COMPLETED'">
-              <el-button type="success" class="action-btn" @click="handleReview">发表评价</el-button>
-            </template>
+          <el-card v-if="hasActions(order.status)" class="action-card">
+            <div class="action-title">订单操作</div>
+            <div class="action-list">
+              <template v-if="order.status === 'WAIT_PAY'">
+                <el-button type="primary" class="action-btn action-btn--primary" @click="handlePay">去支付</el-button>
+              </template>
+              <template v-if="order.status === 'COMPLETED'">
+                <el-button type="success" class="action-btn" @click="handleReview">发表评价</el-button>
+              </template>
+              <template v-if="order.status === 'PENDING' || order.status === 'WAIT_PAY' || order.status === 'BOOKED'">
+                <el-button plain type="danger" class="action-btn" @click="handleCancel">取消订单</el-button>
+              </template>
+            </div>
           </el-card>
         </div>
       </div>
@@ -239,9 +246,14 @@ onMounted(loadOrder);
 
 .detail-grid {
   display: grid;
-  grid-template-columns: 1fr 260px;
-  gap: 20px;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 22px;
   align-items: start;
+}
+
+.detail-main,
+.detail-sidebar {
+  min-width: 0;
 }
 
 .info-card {
@@ -318,39 +330,95 @@ onMounted(loadOrder);
   margin-bottom: 16px;
 }
 
+.amount-card :deep(.el-card__body) {
+  padding: 24px 20px 22px;
+}
+
 .amount-label {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--c-muted);
+  font-weight: 600;
 }
 
 .amount-value {
-  font-size: 32px;
+  font-size: 34px;
   font-weight: 800;
-  color: var(--c-red);
-  margin: 8px 0;
+  color: var(--c-price);
+  line-height: 1.15;
+  margin: 10px 0 14px;
+  letter-spacing: 0;
 }
 
 .amount-meta {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: var(--radius-full);
+  background: var(--c-line-light);
   font-size: 13px;
   color: var(--c-muted);
 }
 
+.paid-label {
+  font-weight: 500;
+}
+
+.paid-pill {
+  display: inline-flex;
+  align-items: center;
+  min-width: 52px;
+  justify-content: center;
+  padding: 2px 9px;
+  border-radius: var(--radius-full);
+  background: var(--c-surface);
+  color: var(--c-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.paid-pill.paid {
+  background: var(--c-green-bg);
+  color: var(--c-green);
+}
+
 .action-card {
+  overflow: hidden;
+}
+
+.action-card :deep(.el-card__body) {
+  padding: 18px;
+}
+
+.action-title {
+  margin-bottom: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--c-ink);
+}
+
+.action-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .action-btn {
   width: 100%;
-  height: 44px;
+  height: 46px;
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 700;
   border-radius: var(--radius-md);
+  margin: 0;
+}
+
+.action-list :deep(.el-button + .el-button) {
+  margin-left: 0;
+}
+
+.action-btn--primary {
+  box-shadow: 0 8px 18px rgb(2 132 199 / 22%);
 }
 
 @media (max-width: 768px) {

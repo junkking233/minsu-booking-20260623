@@ -9,11 +9,13 @@ import com.example.dto.ReviewQuery;
 import com.example.entity.House;
 import com.example.entity.Order;
 import com.example.entity.Review;
+import com.example.entity.SystemConfig;
 import com.example.entity.User;
 import com.example.exception.BusinessException;
 import com.example.mapper.HouseMapper;
 import com.example.mapper.OrderMapper;
 import com.example.mapper.ReviewMapper;
+import com.example.mapper.SystemConfigMapper;
 import com.example.mapper.UserMapper;
 import com.example.service.ReviewService;
 import org.springframework.stereotype.Service;
@@ -35,12 +37,16 @@ public class ReviewServiceImpl implements ReviewService {
 
     private final UserMapper userMapper;
 
+    private final SystemConfigMapper systemConfigMapper;
+
     public ReviewServiceImpl(ReviewMapper reviewMapper, OrderMapper orderMapper,
-                             HouseMapper houseMapper, UserMapper userMapper) {
+                             HouseMapper houseMapper, UserMapper userMapper,
+                             SystemConfigMapper systemConfigMapper) {
         this.reviewMapper = reviewMapper;
         this.orderMapper = orderMapper;
         this.houseMapper = houseMapper;
         this.userMapper = userMapper;
+        this.systemConfigMapper = systemConfigMapper;
     }
 
     @Override
@@ -54,6 +60,10 @@ public class ReviewServiceImpl implements ReviewService {
         }
         if (!"COMPLETED".equals(order.getStatus())) {
             throw new BusinessException(400, "订单未完成，无法评价");
+        }
+        int reviewAvailableDays = getConfigInt("review_available_days", 30);
+        if (order.getCheckOut() != null && java.time.LocalDate.now().isAfter(order.getCheckOut().plusDays(reviewAvailableDays))) {
+            throw new BusinessException(400, "评价入口已过期");
         }
 
         // Check if already reviewed
@@ -184,6 +194,27 @@ public class ReviewServiceImpl implements ReviewService {
                 house.setRating(BigDecimal.valueOf(avg).setScale(1, RoundingMode.HALF_UP));
                 houseMapper.updateById(house);
             }
+        }
+    }
+
+    @Override
+    public List<Review> listByHouse(Long houseId) {
+        QueryWrapper<Review> wrapper = new QueryWrapper<>();
+        wrapper.eq("house_id", houseId)
+                .eq("status", "VISIBLE")
+                .orderByDesc("create_time");
+        return reviewMapper.selectList(wrapper);
+    }
+
+    private int getConfigInt(String key, int defaultValue) {
+        SystemConfig config = systemConfigMapper.selectById(key);
+        if (config == null || config.getConfigValue() == null) {
+            return defaultValue;
+        }
+        try {
+            return Integer.parseInt(config.getConfigValue().trim());
+        } catch (NumberFormatException e) {
+            return defaultValue;
         }
     }
 }

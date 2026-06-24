@@ -80,30 +80,30 @@ onMounted(loadUsers);
       </div>
     </div>
 
-    <el-table :data="users" v-loading="loading" border stripe>
-      <el-table-column prop="id" label="ID" width="60" />
-      <el-table-column label="头像" width="70">
+    <el-table :data="users" v-loading="loading" border stripe class="user-table">
+      <el-table-column prop="id" label="ID" width="64" align="center" />
+      <el-table-column label="头像" width="78" align="center">
         <template #default="{ row }">
           <el-avatar :size="36" :src="row.avatar">
             {{ row.name?.charAt(0) || row.username?.charAt(0) }}
           </el-avatar>
         </template>
       </el-table-column>
-      <el-table-column prop="name" label="昵称" width="100" />
-      <el-table-column prop="username" label="用户名" width="100" />
-      <el-table-column prop="phone" label="手机号" width="130" />
-      <el-table-column prop="createTime" label="注册时间" width="170">
+      <el-table-column prop="name" label="昵称" min-width="150" show-overflow-tooltip />
+      <el-table-column prop="username" label="用户名" min-width="150" show-overflow-tooltip />
+      <el-table-column prop="phone" label="手机号" min-width="160" />
+      <el-table-column prop="createTime" label="注册时间" min-width="190">
         <template #default="{ row }">{{ row.createTime?.replace('T', ' ') }}</template>
       </el-table-column>
-      <el-table-column prop="orderCount" label="订单数" width="80" />
-      <el-table-column label="状态" width="80">
+      <el-table-column prop="orderCount" label="订单数" width="96" align="center" />
+      <el-table-column label="状态" width="96" align="center">
         <template #default="{ row }">
           <el-tag :type="row.status === 1 ? 'success' : 'danger'" size="small">
             {{ row.status === 1 ? '正常' : '禁用' }}
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="操作" width="120" fixed="right">
+      <el-table-column label="操作" width="128" fixed="right" align="center">
         <template #default="{ row }">
           <el-button
             size="small"
@@ -142,4 +142,12 @@ onMounted(loadUsers);
 
 .w-240 { width: 240px; }
 .w-120 { width: 120px; }
+
+.user-table {
+  width: 100%;
+}
+
+.user-table :deep(.el-table__cell) {
+  padding: 12px 0;
+}
 </style>

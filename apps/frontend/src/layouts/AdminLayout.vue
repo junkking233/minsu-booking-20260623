@@ -62,18 +62,8 @@ function logout() {
           </svg>
         </div>
         <div class="brand-text">
-          <div class="brand-title">民宿管理</div>
-          <div class="brand-sub">Admin Console</div>
-        </div>
-      </div>
-
-      <div class="sidebar-user">
-        <el-avatar :size="40" class="user-avatar">
-          <el-icon><UserFilled /></el-icon>
-        </el-avatar>
-        <div class="user-info">
-          <strong>{{ currentUser?.name || currentUser?.username || '管理员' }}</strong>
-          <span>系统管理员</span>
+          <div class="brand-title">栖云智宿</div>
+          <div class="brand-sub">SmartStay Console</div>
         </div>
       </div>
 
@@ -86,10 +76,13 @@ function logout() {
 
       <div class="sidebar-bottom">
         <div class="logout-user">
-          <el-avatar :size="28" class="logout-avatar">
+          <el-avatar :size="34" class="user-avatar">
             <el-icon><UserFilled /></el-icon>
           </el-avatar>
-          <span class="logout-name">{{ currentUser?.name || currentUser?.username }}</span>
+          <div class="user-info">
+            <strong>{{ currentUser?.name || currentUser?.username || '管理员' }}</strong>
+            <span>系统管理员</span>
+          </div>
         </div>
         <el-button :icon="SwitchButton" text class="logout-btn" @click="logout">
           退出登录
@@ -165,11 +158,6 @@ function logout() {
 }
 
 /* User */
-.sidebar-user {
-  display: flex; align-items: center; gap: 10px;
-  padding: 16px 10px;
-  border-bottom: 1px solid rgb(255 255 255 / 6%);
-}
 .user-avatar {
   background: linear-gradient(135deg, #0ea5e9, var(--c-primary-dark));
   color: #fff;
@@ -205,18 +193,18 @@ function logout() {
 }
 
 /* Bottom */
-.sidebar-bottom { padding-top: 12px; border-top: 1px solid rgb(255 255 255 / 6%); }
+.sidebar-bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid rgb(255 255 255 / 6%);
+}
 .logout-user {
-  display: flex; align-items: center; gap: 8px;
-  padding: 6px 10px; margin-bottom: 6px;
-}
-.logout-avatar {
-  background: linear-gradient(135deg, #0ea5e9, var(--c-primary-dark));
-  color: #fff; font-size: 14px;
-}
-.logout-name {
-  color: #e2e8f0; font-size: 13px; font-weight: 500;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 8px 2px;
 }
 .logout-btn {
   width: 100%; justify-content: center;
@@ -273,7 +261,7 @@ function logout() {
     position: relative; height: auto; padding: 10px;
     flex-direction: row; flex-wrap: wrap; gap: 6px;
   }
-  .sidebar-brand, .sidebar-user, .sidebar-bottom { display: none; }
+  .sidebar-brand, .sidebar-bottom { display: none; }
   .admin-menu {
     display: flex; flex: 1 1 auto; min-width: 0; gap: 4px; padding-top: 0;
   }

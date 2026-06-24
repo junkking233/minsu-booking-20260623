@@ -5,6 +5,8 @@
     <select id="searchHouses" resultType="com.example.entity.House">
         SELECT * FROM t_house
         <where>
+            <!-- 用户端只展示上架房源 -->
+            AND status = 'ON'
             <if test="query.keyword != null and query.keyword != ''">
                 AND (name LIKE CONCAT('%', #{query.keyword}, '%')
                      OR city LIKE CONCAT('%', #{query.keyword}, '%')
@@ -21,6 +23,23 @@
             </if>
             <if test="query.maxPrice != null">
                 AND price &lt;= #{query.maxPrice}
+            </if>
+            <if test="query.guests != null">
+                AND capacity &gt;= #{query.guests}
+            </if>
+            <!-- 日期可用性：排除被锁定日期覆盖的房源 -->
+            <if test="query.checkIn != null and query.checkOut != null">
+                AND id NOT IN (
+                    SELECT house_id FROM t_availability
+                    WHERE date &gt;= #{query.checkIn} AND date &lt; #{query.checkOut}
+                )
+                <!-- 排除被有效订单占用的房源 -->
+                AND id NOT IN (
+                    SELECT house_id FROM t_order
+                    WHERE status NOT IN ('CANCELLED', 'REFUNDED')
+                      AND check_in &lt; #{query.checkOut}
+                      AND check_out &gt; #{query.checkIn}
+                )
             </if>
         </where>
         <choose>

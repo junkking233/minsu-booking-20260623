@@ -21,7 +21,12 @@ interface HouseRecord {
   rooms: string;
   area: string;
   capacity: number;
+  address: string;
+  host: string;
   coverImage: string;
+  facilities: string[];
+  description: string;
+  rule: string;
   status: string;
   rating: number;
   sales: number;
@@ -94,7 +99,8 @@ function openEdit(row: HouseRecord) {
   Object.assign(form, {
     name: row.name, city: row.city, price: row.price, cleanFee: row.cleanFee,
     type: row.type, rooms: row.rooms, area: row.area, capacity: row.capacity,
-    address: '', host: '', coverImage: row.coverImage, facilities: [], description: '', rule: '',
+    address: row.address, host: row.host, coverImage: row.coverImage,
+    facilities: row.facilities || [], description: row.description || '', rule: row.rule || '',
   });
   dialogVisible.value = true;
 }
@@ -178,33 +184,39 @@ onMounted(loadData);
     </div>
 
     <!-- 表格 -->
-    <el-table :data="houses" v-loading="loading" border stripe class="w-full">
-      <el-table-column label="封面" width="80">
+    <el-table :data="houses" v-loading="loading" border stripe class="w-full house-table">
+      <el-table-column label="封面" width="92" align="center">
         <template #default="{ row }">
           <img :src="row.coverImage || '/placeholder.svg'" class="table-img" />
         </template>
       </el-table-column>
-      <el-table-column prop="name" label="名称" min-width="140" />
-      <el-table-column prop="city" label="城市" width="80" />
-      <el-table-column prop="price" label="价格" width="90">
+      <el-table-column prop="name" label="名称" min-width="180" show-overflow-tooltip>
+        <template #default="{ row }">
+          <span class="house-name-cell">{{ row.name }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column prop="city" label="城市" width="90" />
+      <el-table-column prop="price" label="价格" width="96">
         <template #default="{ row }">¥{{ row.price }}</template>
       </el-table-column>
-      <el-table-column prop="type" label="类型" width="80" />
-      <el-table-column prop="capacity" label="可住" width="60" />
-      <el-table-column prop="rating" label="评分" width="70" />
-      <el-table-column prop="status" label="状态" width="80">
+      <el-table-column prop="type" label="类型" width="92" />
+      <el-table-column prop="capacity" label="可住" width="76" align="center" />
+      <el-table-column prop="rating" label="评分" width="76" align="center" />
+      <el-table-column prop="status" label="状态" width="92" align="center">
         <template #default="{ row }">
           <el-tag :type="row.status === 'ON' ? 'success' : 'info'">{{ row.status === 'ON' ? '上架' : '下架' }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="操作" width="260" fixed="right">
+      <el-table-column label="操作" width="250" fixed="right" align="center">
         <template #default="{ row }">
-          <el-button size="small" @click="openEdit(row)">编辑</el-button>
-          <el-button size="small" :type="row.status === 'ON' ? 'warning' : 'success'" @click="handleToggleStatus(row)">
-            {{ row.status === 'ON' ? '下架' : '上架' }}
-          </el-button>
-          <el-button size="small" @click="goCalendar(row.id)">房态</el-button>
-          <el-button size="small" type="danger" @click="handleDelete(row)">删除</el-button>
+          <div class="table-actions">
+            <el-button size="small" @click="openEdit(row)">编辑</el-button>
+            <el-button size="small" :type="row.status === 'ON' ? 'warning' : 'success'" @click="handleToggleStatus(row)">
+              {{ row.status === 'ON' ? '下架' : '上架' }}
+            </el-button>
+            <el-button size="small" @click="goCalendar(row.id)">房态</el-button>
+            <el-button size="small" type="danger" @click="handleDelete(row)">删除</el-button>
+          </div>
         </template>
       </el-table-column>
     </el-table>
@@ -322,11 +334,44 @@ onMounted(loadData);
 .w-120 { width: 120px; }
 .w-full { width: 100%; }
 
+.house-table {
+  table-layout: fixed;
+}
+
+.house-table :deep(.el-table__cell) {
+  padding: 12px 0;
+}
+
+.house-name-cell {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
+  font-weight: 500;
+  color: var(--c-body);
+}
+
 .table-img {
   width: 60px;
   height: 45px;
   object-fit: cover;
   border-radius: 4px;
+  display: block;
+  margin: 0 auto;
+}
+
+.table-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+.table-actions :deep(.el-button) {
+  margin-left: 0;
 }
 
 .cover-upload {

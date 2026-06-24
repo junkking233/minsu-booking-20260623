@@ -8,6 +8,7 @@ import {
 import { houseApi } from '@/api/houseApi';
 import { configApi } from '@/api/configApi';
 import HouseCard from '@/components/common/HouseCard.vue';
+import { formatDateParam } from '@/utils/date';
 
 const router = useRouter();
 
@@ -27,8 +28,8 @@ const searchForm = ref({ city: '', checkIn: '', checkOut: '', guests: 1 });
 function onSearch() {
   const query: Record<string, string> = {};
   if (searchForm.value.city) query.city = searchForm.value.city;
-  if (searchForm.value.checkIn) query.checkIn = searchForm.value.checkIn;
-  if (searchForm.value.checkOut) query.checkOut = searchForm.value.checkOut;
+  if (searchForm.value.checkIn) query.checkIn = formatDateParam(searchForm.value.checkIn);
+  if (searchForm.value.checkOut) query.checkOut = formatDateParam(searchForm.value.checkOut);
   if (searchForm.value.guests > 1) query.guests = String(searchForm.value.guests);
   router.push({ path: '/portal/houses', query });
 }
@@ -100,6 +101,7 @@ function cityColor(index: number) { return cityColors[index % cityColors.length]
               <el-date-picker
                 v-model="searchForm.checkIn"
                 type="date"
+                value-format="YYYY-MM-DD"
                 placeholder="选择日期"
                 :disabled-date="(d: Date) => d.getTime() < Date.now() - 86400000"
                 size="large"
@@ -112,6 +114,7 @@ function cityColor(index: number) { return cityColors[index % cityColors.length]
               <el-date-picker
                 v-model="searchForm.checkOut"
                 type="date"
+                value-format="YYYY-MM-DD"
                 placeholder="选择日期"
                 :disabled-date="(d: Date) => !searchForm.checkIn || d.getTime() <= new Date(searchForm.checkIn).getTime()"
                 size="large"
@@ -126,6 +129,7 @@ function cityColor(index: number) { return cityColors[index % cityColors.length]
                   v-model="searchForm.guests"
                   :min="1" :max="20"
                   size="large"
+                  controls-position="right"
                   class="search-guests"
                 />
               </div>
@@ -352,9 +356,9 @@ function cityColor(index: number) { return cityColors[index % cityColors.length]
 
 /* ---- 搜索栏 ---- */
 .search-bar {
-  display: flex; align-items: center; gap: 16px;
-  max-width: 820px; margin: 0 auto;
-  padding: 8px 8px 8px 24px;
+  display: flex; align-items: center; gap: 14px;
+  max-width: 900px; margin: 0 auto;
+  padding: 10px 12px 10px 24px;
   background: var(--c-surface);
   border-radius: var(--radius-xl);
   box-shadow:
@@ -363,13 +367,21 @@ function cityColor(index: number) { return cityColors[index % cityColors.length]
   border: 1px solid rgb(229 232 236 / 80%);
 }
 .search-fields {
-  flex: 1; display: flex; align-items: flex-end; gap: 0;
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(150px, 1.15fr) 1px minmax(135px, 1fr) 1px minmax(135px, 1fr) 1px 126px;
+  align-items: end;
+  min-width: 0;
 }
-.search-field { flex: 1; min-width: 110px; padding: 0 12px; }
-.search-field--city { flex: 1.3; min-width: 110px; }
+.search-field {
+  min-width: 0;
+  padding: 0 10px;
+  box-sizing: border-box;
+}
+.search-field--city { min-width: 0; }
 .search-field:first-child { padding-left: 0; }
-.search-date { min-width: 110px; width: 100%; }
-.search-guests { min-width: 90px; }
+.search-date { width: 100%; }
+.search-guests { width: 100%; }
 .search-label {
   display: block; font-size: 12px; font-weight: 600;
   color: var(--c-muted); margin-bottom: 6px;
@@ -378,19 +390,24 @@ function cityColor(index: number) { return cityColors[index % cityColors.length]
 .search-divider {
   width: 1px; height: 36px;
   background: var(--c-line);
-  align-self: center;
+  align-self: end;
+  margin-bottom: 2px;
 }
 .search-select {
   width: 100%;
-  min-width: 100px;
+  min-width: 0;
 }
 .search-select :deep(.el-input__wrapper) {
-  box-shadow: none !important; background: transparent;
-  padding: 0 8px; border-radius: var(--radius-sm) !important;
+  height: 36px;
+  box-shadow: none !important;
+  background: transparent;
+  padding: 0;
+  border-radius: var(--radius-sm) !important;
   border: 1px solid transparent;
 }
 .search-select :deep(.el-input__wrapper:hover) {
-  border-color: var(--c-line) !important;
+  background: var(--c-line-light);
+  border-color: transparent !important;
   box-shadow: none !important;
 }
 .search-select :deep(.el-input__wrapper.is-focus) {
@@ -399,39 +416,69 @@ function cityColor(index: number) { return cityColors[index % cityColors.length]
 }
 
 .search-date {
-  width: 100%;
+  width: 100% !important;
+  max-width: 100%;
+  min-width: 0;
 }
 .search-date :deep(.el-input__wrapper) {
+  height: 36px;
   box-shadow: none !important; background: transparent;
-  padding: 0 8px; border-radius: var(--radius-sm) !important;
+  padding: 0; border-radius: var(--radius-sm) !important;
   border: 1px solid transparent;
 }
 .search-date :deep(.el-input__wrapper:hover) {
-  border-color: var(--c-line) !important;
+  background: var(--c-line-light);
+  border-color: transparent !important;
   box-shadow: none !important;
 }
 .search-date :deep(.el-input__wrapper.is-focus) {
   box-shadow: 0 0 0 2px rgb(2 132 199 / 10%) !important;
   border-color: var(--c-primary-light) !important;
 }
+.search-date :deep(.el-input__inner) {
+  min-width: 0;
+}
 
 .search-guests {
-  width: 100%;
+  width: 100% !important;
+  max-width: 100%;
+  min-width: 0;
+}
+.search-guests :deep(.el-input-number__decrease),
+.search-guests :deep(.el-input-number__increase) {
+  width: 26px;
+  height: 18px;
+  right: 1px;
+  background: var(--c-line-light);
+  border-color: var(--c-line);
+  color: var(--c-muted);
+}
+.search-guests :deep(.el-input-number__decrease:hover),
+.search-guests :deep(.el-input-number__increase:hover) {
+  color: var(--c-primary);
 }
 .search-guests :deep(.el-input__wrapper) {
+  height: 36px;
   box-shadow: none !important; background: transparent;
-  padding: 0 8px; border-radius: var(--radius-sm) !important;
+  padding: 0 28px 0 6px; border-radius: var(--radius-sm) !important;
   border: 1px solid transparent;
 }
+.search-guests :deep(.el-input__inner) {
+  text-align: left;
+}
 .search-guests :deep(.el-input__wrapper:hover) {
-  border-color: var(--c-line) !important;
+  background: var(--c-line-light);
+  border-color: transparent !important;
   box-shadow: none !important;
 }
 .search-guests :deep(.el-input__wrapper.is-focus) {
   box-shadow: 0 0 0 2px rgb(2 132 199 / 10%) !important;
   border-color: var(--c-primary-light) !important;
 }
-.guests-select { width: 100%; }
+.guests-select {
+  width: 100%;
+  min-width: 0;
+}
 
 .search-btn-coral {
   flex-shrink: 0;
@@ -598,6 +645,12 @@ function cityColor(index: number) { return cityColors[index % cityColors.length]
 
 /* ==================== Responsive ==================== */
 @media (max-width: 1024px) {
+  .search-bar { max-width: 820px; }
+  .search-fields {
+    grid-template-columns: minmax(130px, 1.1fr) 1px minmax(120px, 1fr) 1px minmax(120px, 1fr) 1px 116px;
+  }
+  .search-field { padding: 0 8px; }
+  .search-btn-coral { padding: 0 22px; }
   .features-grid { grid-template-columns: repeat(2, 1fr); }
   .testimonial-banner { grid-template-columns: 1fr; }
   .testimonial-stats { grid-template-columns: repeat(2, 1fr); }
@@ -609,10 +662,15 @@ function cityColor(index: number) { return cityColors[index % cityColors.length]
   .search-bar {
     flex-direction: column; padding: 16px;
   }
-  .search-fields { flex-direction: column; }
+  .search-fields {
+    width: 100%;
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
   .search-field { padding: 8px 0; }
   .search-divider {
     width: 100%; height: 1px;
+    margin: 0;
   }
   .search-btn-coral { width: 100%; justify-content: center; }
   .house-grid { grid-template-columns: 1fr; }

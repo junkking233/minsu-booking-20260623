@@ -1,4 +1,5 @@
 import http from '@/api/http';
+import { formatDateParam } from '@/utils/date';
 
 export interface HouseSearchParams {
   keyword?: string;
@@ -40,15 +41,33 @@ export interface HouseFormData {
 
 export const houseApi = {
   search(params: HouseSearchParams) {
-    return http.get('/houses', { params });
+    return http.get('/houses', {
+      params: {
+        ...params,
+        checkIn: params.checkIn ? formatDateParam(params.checkIn) : undefined,
+        checkOut: params.checkOut ? formatDateParam(params.checkOut) : undefined,
+      },
+    });
   },
 
   getDetail(id: number, params?: { checkIn?: string; checkOut?: string }) {
-    return http.get(`/houses/${id}`, { params });
+    return http.get(`/houses/${id}`, {
+      params: params ? {
+        ...params,
+        checkIn: params.checkIn ? formatDateParam(params.checkIn) : undefined,
+        checkOut: params.checkOut ? formatDateParam(params.checkOut) : undefined,
+      } : undefined,
+    });
   },
 
   checkAvailability(id: number, params: { checkIn: string; checkOut: string; guests: number }) {
-    return http.get(`/houses/${id}/availability`, { params });
+    return http.get(`/houses/${id}/availability`, {
+      params: {
+        ...params,
+        checkIn: formatDateParam(params.checkIn),
+        checkOut: formatDateParam(params.checkOut),
+      },
+    });
   },
 
   adminList(params: AdminHouseParams) {

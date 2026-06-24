@@ -20,6 +20,8 @@ public class DashboardOverview {
 
     private BigDecimal avgRating;
 
+    private Integer totalFavorites;
+
     public Integer getTotalHouses() {
         return totalHouses;
     }
@@ -82,5 +84,13 @@ public class DashboardOverview {
 
     public void setAvgRating(BigDecimal avgRating) {
         this.avgRating = avgRating;
+    }
+
+    public Integer getTotalFavorites() {
+        return totalFavorites;
+    }
+
+    public void setTotalFavorites(Integer totalFavorites) {
+        this.totalFavorites = totalFavorites;
     }
 }

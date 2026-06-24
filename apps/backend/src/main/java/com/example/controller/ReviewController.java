@@ -24,6 +24,12 @@ public class ReviewController {
         return Result.ok("评价成功", reviewService.create(currentUser(httpRequest).getUserId(), request));
     }
 
+    /** 用户端：查询指定房源的可见评价列表 */
+    @GetMapping("/house/{houseId}")
+    public Result<java.util.List<Review>> listByHouse(@PathVariable Long houseId) {
+        return Result.ok(reviewService.listByHouse(houseId));
+    }
+
     private TokenSubject currentUser(HttpServletRequest request) {
         Object subject = request.getAttribute("currentUser");
         if (subject instanceof TokenSubject tokenSubject) {

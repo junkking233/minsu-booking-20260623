@@ -1,5 +1,5 @@
 /**
- * 民宿预约管理系统 - 全局样式 v3 "蓝海岸"
+ * 栖云智宿 - 全局样式 v3 "蓝海岸"
  * 温暖、专业、有质感的民宿预订平台设计语言
  */
 
@@ -192,6 +192,20 @@ a:hover { color: var(--c-primary-dark); }
 }
 .el-textarea__inner { border-radius: var(--radius-md); }
 
+/* Element Plus date editors have a fixed default width. Keep them inside cards,
+   grids, sidebars, and compact filters unless a page explicitly sets another width. */
+.el-date-editor.el-input,
+.el-date-editor.el-input__wrapper {
+  max-width: 100%;
+  min-width: 0;
+}
+.el-date-editor .el-input__wrapper {
+  min-width: 0;
+}
+.el-date-editor .el-input__inner {
+  min-width: 0;
+}
+
 /* ---- 3d. Menu ---- */
 .el-menu--horizontal > .el-menu-item.is-active {
   color: var(--c-primary) !important;
@@ -260,10 +274,45 @@ a:hover { color: var(--c-primary-dark); }
 .el-table__body tr:hover > td.el-table__cell { background: var(--c-primary-bg); }
 
 /* ---- 3i. Pagination ---- */
-.el-pagination .el-pager li.is-active {
-  background: linear-gradient(135deg, var(--c-primary), var(--c-primary-dark));
-  box-shadow: 0 2px 8px rgb(2 132 199 / 30%);
+.el-pagination {
+  --el-pagination-button-width: 34px;
+  --el-pagination-button-height: 32px;
+  align-items: center;
+  gap: 6px;
+}
+.el-pagination .btn-prev,
+.el-pagination .btn-next,
+.el-pagination .el-pager li {
+  min-width: 34px;
+  width: 34px;
+  height: 32px;
+  margin: 0;
   border-radius: var(--radius-sm);
+  background: var(--c-surface);
+  color: var(--c-muted);
+  box-shadow: none;
+  transition: all var(--transition-fast);
+}
+.el-pagination .el-pager {
+  display: flex;
+  gap: 6px;
+}
+.el-pagination .btn-prev:hover,
+.el-pagination .btn-next:hover,
+.el-pagination .el-pager li:hover {
+  background: var(--c-primary-bg);
+  color: var(--c-primary);
+}
+.el-pagination .el-pager li.is-active {
+  background: var(--c-primary);
+  color: #fff;
+  box-shadow: 0 3px 10px rgb(2 132 199 / 22%);
+  font-weight: 700;
+}
+.el-pagination button:disabled {
+  background: var(--c-surface);
+  color: var(--c-muted-light);
+  opacity: 0.55;
 }
 
 /* ---- 3j. Tabs ---- */

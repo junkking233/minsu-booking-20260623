@@ -300,11 +300,16 @@ onMounted(async () => {
   cursor: pointer;
   border-radius: var(--radius-lg);
   overflow: hidden;
-  transition: transform var(--transition-fast);
+  transition: all var(--transition-base);
 }
 
 .house-card:hover {
   transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.house-card:hover .card-cover img {
+  transform: scale(1.05);
 }
 
 .card-cover {
@@ -317,6 +322,7 @@ onMounted(async () => {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform var(--transition-slow);
 }
 
 .card-type {

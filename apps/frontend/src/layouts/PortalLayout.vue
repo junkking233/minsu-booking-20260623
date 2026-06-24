@@ -8,6 +8,8 @@ const route = useRoute();
 const router = useRouter();
 const currentUser = getCurrentUser();
 
+const isAdmin = computed(() => currentUser?.role === 'ADMIN');
+
 const navItems = [
   { label: '首页', path: '/portal/home' },
   { label: '房源列表', path: '/portal/houses' },
@@ -22,6 +24,12 @@ const activeMenu = computed(() => {
   if (route.path.startsWith('/portal/favorites')) return '/portal/favorites';
   return '/portal/home';
 });
+
+function handleDropdown(cmd: string) {
+  if (cmd === 'profile') router.push('/portal/profile');
+  else if (cmd === 'admin') router.push('/admin/dashboard');
+  else if (cmd === 'logout') logout();
+}
 
 function logout() {
   clearAuthState();
@@ -58,7 +66,7 @@ function logout() {
 
         <div class="header-actions">
           <template v-if="currentUser">
-            <el-dropdown trigger="click" @command="(cmd: string) => { if (cmd === 'profile') router.push('/portal/profile'); else if (cmd === 'logout') logout(); }">
+            <el-dropdown trigger="click" @command="handleDropdown">
               <span class="user-badge">
                 <el-avatar :size="32" class="user-avatar">
                   <el-icon><User /></el-icon>
@@ -69,14 +77,18 @@ function logout() {
               <template #dropdown>
                 <el-dropdown-menu>
                   <el-dropdown-item command="profile">个人中心</el-dropdown-item>
-                  <el-dropdown-item command="logout" divided>退出登录</el-dropdown-item>
+                  <el-dropdown-item v-if="isAdmin" command="admin" divided>
+                    <span class="admin-menu-item">管理后台</span>
+                  </el-dropdown-item>
+                  <el-dropdown-item command="logout" :divided="!isAdmin">退出登录</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
           </template>
-          <el-button v-else type="primary" class="login-btn" @click="router.push('/login')">
-            登录
-          </el-button>
+          <template v-else>
+            <el-button class="register-btn" @click="router.push('/login?mode=register')">注册</el-button>
+            <el-button type="primary" class="login-btn" @click="router.push('/login')">登录</el-button>
+          </template>
         </div>
       </div>
     </header>
@@ -93,7 +105,41 @@ function logout() {
     <!-- 页脚 -->
     <footer class="portal-footer">
       <div class="footer-inner">
-        <span>&copy; 2026 民宿预约管理系统</span>
+        <div class="footer-top">
+          <div class="footer-brand">
+            <div class="footer-logo">
+              <svg viewBox="0 0 32 32" fill="none">
+                <rect width="32" height="32" rx="8" fill="url(#footerGrad)" />
+                <path d="M10 22V12l6 5 6-5v10" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                <defs>
+                  <linearGradient id="footerGrad" x1="0" y1="0" x2="32" y2="32">
+                    <stop stop-color="#0ea5e9" />
+                    <stop offset="1" stop-color="#2563eb" />
+                  </linearGradient>
+                </defs>
+              </svg>
+              <span>民宿预约</span>
+            </div>
+            <p class="footer-desc">发现美好住宿体验，精选品质民宿，让每一次旅行都充满期待。</p>
+          </div>
+          <div class="footer-links">
+            <div class="footer-col">
+              <h4>快速导航</h4>
+              <a @click.prevent="router.push('/portal/home')">首页</a>
+              <a @click.prevent="router.push('/portal/houses')">房源列表</a>
+              <a @click.prevent="router.push('/portal/orders')">我的订单</a>
+            </div>
+            <div class="footer-col">
+              <h4>帮助支持</h4>
+              <a href="#">使用指南</a>
+              <a href="#">常见问题</a>
+              <a href="#">联系客服</a>
+            </div>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <span>&copy; 2026 民宿预约管理系统 All Rights Reserved</span>
+        </div>
       </div>
     </footer>
 
@@ -125,8 +171,8 @@ function logout() {
   min-height: 100vh;
   flex-direction: column;
   background:
-    radial-gradient(ellipse 80% 60% at 10% 0%, rgb(14 165 233 / 6%), transparent),
-    radial-gradient(ellipse 60% 50% at 90% 100%, rgb(37 99 235 / 5%), transparent),
+    radial-gradient(ellipse 80% 60% at 10% 0%, rgb(14 165 233 / 4%), transparent),
+    radial-gradient(ellipse 60% 50% at 90% 100%, rgb(37 99 235 / 3%), transparent),
     var(--c-bg);
   padding-bottom: 70px;
 }
@@ -136,7 +182,7 @@ function logout() {
   position: sticky;
   z-index: 50;
   top: 0;
-  background: rgb(255 255 255 / 85%);
+  background: rgb(255 255 255 / 88%);
   border-bottom: 1px solid var(--c-line);
   backdrop-filter: blur(20px) saturate(1.8);
   -webkit-backdrop-filter: blur(20px) saturate(1.8);
@@ -247,6 +293,17 @@ function logout() {
   color: var(--c-muted);
 }
 
+.admin-menu-item {
+  color: var(--c-primary);
+  font-weight: 600;
+}
+
+.register-btn {
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  padding: 0 18px;
+}
+
 .login-btn {
   font-weight: 600;
   border-radius: var(--radius-md);
@@ -261,17 +318,84 @@ function logout() {
 
 /* Footer */
 .portal-footer {
-  padding: 18px 28px;
-  background: var(--c-surface);
-  border-top: 1px solid var(--c-line);
+  padding: 0;
+  background: #0f172a;
+  color: #94a3b8;
 }
 
 .footer-inner {
   max-width: 1280px;
   margin: 0 auto;
+}
+
+.footer-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 40px;
+  padding: 40px 28px 32px;
+}
+
+.footer-brand {
+  max-width: 360px;
+}
+
+.footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.footer-logo svg {
+  width: 28px;
+  height: 28px;
+}
+
+.footer-logo span {
+  font-size: 18px;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.footer-desc {
+  font-size: 14px;
+  line-height: 1.7;
+  color: #64748b;
+  margin: 0;
+}
+
+.footer-links {
+  display: flex;
+  gap: 60px;
+}
+
+.footer-col h4 {
+  margin: 0 0 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.footer-col a {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: #64748b;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.footer-col a:hover {
+  color: #0ea5e9;
+}
+
+.footer-bottom {
+  padding: 18px 28px;
+  border-top: 1px solid rgb(255 255 255 / 6%);
   text-align: center;
-  color: var(--c-muted);
   font-size: 13px;
+  color: #475569;
 }
 
 /* Page transition */
@@ -345,6 +469,10 @@ function logout() {
   }
 
   .portal-footer {
+    display: none;
+  }
+
+  .register-btn {
     display: none;
   }
 }

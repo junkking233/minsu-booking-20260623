@@ -247,6 +247,7 @@ onMounted(() => {
 .profile-avatar {
   background: linear-gradient(135deg, var(--c-primary), var(--c-primary-dark));
   color: #fff;
+  box-shadow: 0 4px 12px rgb(14 165 233 / 30%);
 }
 
 .profile-meta h2 {
@@ -309,9 +310,14 @@ onMounted(() => {
 
 .stat-item {
   text-align: center;
-  padding: 12px;
+  padding: 16px 12px;
   background: var(--c-line-light);
   border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+}
+
+.stat-item:hover {
+  background: var(--c-primary-bg);
 }
 
 .stat-value {

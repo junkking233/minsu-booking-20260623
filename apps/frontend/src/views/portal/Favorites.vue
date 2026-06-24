@@ -143,6 +143,18 @@ onMounted(loadFavorites);
 .fav-card {
   border-radius: var(--radius-lg);
   overflow: hidden;
+  transition: all var(--transition-base);
+  background: var(--c-surface);
+  border: 1px solid var(--c-line);
+}
+
+.fav-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.fav-card:hover .fav-img {
+  transform: scale(1.05);
 }
 
 .fav-img {
@@ -150,6 +162,7 @@ onMounted(loadFavorites);
   height: 180px;
   object-fit: cover;
   cursor: pointer;
+  transition: transform var(--transition-slow);
 }
 
 .fav-body {

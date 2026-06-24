@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { Lock, User } from '@element-plus/icons-vue';
 import { ElMessage } from 'element-plus';
@@ -10,6 +10,12 @@ const route = useRoute();
 const router = useRouter();
 
 const isRegister = ref(false);
+
+onMounted(() => {
+  if (route.query.mode === 'register') {
+    isRegister.value = true;
+  }
+});
 const loginForm = ref({ username: '', password: '' });
 const registerForm = ref({ username: '', password: '', confirmPassword: '', name: '' });
 const loading = ref(false);
@@ -79,23 +85,50 @@ async function handleRegister() {
       <div class="bg-orb orb-2" />
     </div>
 
-    <div class="login-card">
-      <div class="login-brand">
-        <div class="brand-icon">
-          <svg viewBox="0 0 48 48" fill="none">
-            <rect width="48" height="48" rx="14" fill="url(#loginGrad)" />
-            <path d="M14 34V20l10 8 10-8v14" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
-            <defs>
-              <linearGradient id="loginGrad" x1="0" y1="0" x2="48" y2="48">
-                <stop stop-color="#0ea5e9" />
-                <stop offset="1" stop-color="#2563eb" />
-              </linearGradient>
-            </defs>
-          </svg>
+    <div class="login-wrapper">
+      <!-- 左侧装饰面板 -->
+      <div class="login-decor">
+        <div class="decor-content">
+          <div class="decor-icon">
+            <svg viewBox="0 0 64 64" fill="none">
+              <rect width="64" height="64" rx="18" fill="url(#decorGrad)" opacity="0.15" />
+              <path d="M20 44V24l12 9 12-9v20" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+              <defs>
+                <linearGradient id="decorGrad" x1="0" y1="0" x2="64" y2="64">
+                  <stop stop-color="#0ea5e9" />
+                  <stop offset="1" stop-color="#2563eb" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+          <h2>欢迎来到<br />民宿预约平台</h2>
+          <p>精选全国优质民宿，为您提供舒适的住宿体验。无论是周末度假还是长期旅居，都能找到理想的居所。</p>
+          <div class="decor-features">
+            <div class="decor-feature">
+              <span class="feature-icon">🏠</span>
+              <span>精选房源</span>
+            </div>
+            <div class="decor-feature">
+              <span class="feature-icon">🔒</span>
+              <span>安全支付</span>
+            </div>
+            <div class="decor-feature">
+              <span class="feature-icon">⭐</span>
+              <span>优质服务</span>
+            </div>
+          </div>
         </div>
-        <h2>民宿预约管理系统</h2>
-        <p>发现美好住宿体验</p>
       </div>
+
+      <!-- 右侧登录卡片 -->
+      <div class="login-card">
+        <div class="card-top-link">
+          <el-button link type="primary" @click="router.push('/portal/home')">&larr; 返回首页</el-button>
+        </div>
+        <div class="login-brand">
+          <h2>{{ isRegister ? '注册新账号' : '欢迎回来' }}</h2>
+          <p>{{ isRegister ? '创建账号，开始预订民宿' : '登录您的账号' }}</p>
+        </div>
 
       <!-- 登录表单 -->
       <template v-if="!isRegister">
@@ -203,6 +236,7 @@ async function handleRegister() {
         <span>管理员 <strong>admin</strong> / <strong>admin123</strong></span>
       </div>
     </div>
+    </div>
   </div>
 </template>
 
@@ -251,41 +285,117 @@ async function handleRegister() {
   background: rgb(37 99 235 / 8%);
 }
 
+.login-wrapper {
+  position: relative;
+  display: flex;
+  max-width: 900px;
+  width: 100%;
+  min-height: 520px;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-xl);
+}
+
+.login-decor {
+  flex: 1;
+  background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 50%, #1d4ed8 100%);
+  padding: 48px 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.login-decor::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 20% 80%, rgb(255 255 255 / 8%), transparent 50%),
+    radial-gradient(circle at 80% 20%, rgb(255 255 255 / 5%), transparent 50%);
+}
+
+.decor-content {
+  position: relative;
+  z-index: 1;
+  color: #fff;
+}
+
+.decor-icon {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 24px;
+}
+
+.decor-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.decor-content h2 {
+  margin: 0 0 16px;
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1.3;
+  letter-spacing: -0.5px;
+}
+
+.decor-content > p {
+  margin: 0 0 32px;
+  font-size: 15px;
+  line-height: 1.7;
+  color: rgb(255 255 255 / 80%);
+}
+
+.decor-features {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.decor-feature {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: rgb(255 255 255 / 90%);
+}
+
+.feature-icon {
+  font-size: 18px;
+}
+
 .login-card {
   position: relative;
-  width: 100%;
-  max-width: 420px;
+  width: 380px;
+  flex-shrink: 0;
   padding: 40px 36px;
-  background: rgb(255 255 255 / 95%);
-  border: 1px solid var(--c-line);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-xl);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: var(--c-surface);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.card-top-link {
+  margin-bottom: 8px;
+}
+
+.card-top-link .el-button {
+  font-size: 14px;
 }
 
 .login-brand {
   text-align: center;
-  margin-bottom: 32px;
-}
-
-.brand-icon {
-  width: 52px;
-  height: 52px;
-  margin: 0 auto 14px;
-}
-
-.brand-icon svg {
-  width: 100%;
-  height: 100%;
-  filter: drop-shadow(0 4px 10px rgb(14 165 233 / 30%));
+  margin-bottom: 28px;
 }
 
 .login-brand h2 {
   margin: 0 0 6px;
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 800;
   letter-spacing: -0.5px;
+  color: var(--c-ink);
 }
 
 .login-brand p {
@@ -341,7 +451,46 @@ async function handleRegister() {
   font-weight: 600;
 }
 
-@media (max-width: 560px) {
+@media (max-width: 768px) {
+  .login-wrapper {
+    flex-direction: column;
+    min-height: auto;
+    max-width: 420px;
+  }
+
+  .login-decor {
+    padding: 32px 28px;
+  }
+
+  .decor-content h2 {
+    font-size: 22px;
+  }
+
+  .decor-features {
+    flex-direction: row;
+    gap: 16px;
+  }
+
+  .login-card {
+    width: 100%;
+    padding: 32px 28px;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-page {
+    padding: 0;
+  }
+
+  .login-wrapper {
+    border-radius: 0;
+    min-height: 100vh;
+  }
+
+  .login-decor {
+    display: none;
+  }
+
   .login-card {
     padding: 28px 20px;
   }

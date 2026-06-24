@@ -219,6 +219,12 @@ onMounted(loadOrders);
 .order-card {
   cursor: pointer;
   border-radius: var(--radius-md);
+  transition: all var(--transition-base);
+}
+
+.order-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
 }
 
 .order-top {

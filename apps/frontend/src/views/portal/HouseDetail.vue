@@ -265,6 +265,18 @@ onMounted(loadDetail);
   border-radius: var(--radius-lg);
   overflow: hidden;
   margin-bottom: 28px;
+  position: relative;
+}
+
+.cover-section::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 120px;
+  background: linear-gradient(to top, rgb(0 0 0 / 30%), transparent);
+  pointer-events: none;
 }
 
 .cover-img {
@@ -401,11 +413,11 @@ onMounted(loadDetail);
 .booking-card {
   position: sticky;
   top: 80px;
-  padding: 24px;
+  padding: 28px;
   background: var(--c-surface);
   border: 1px solid var(--c-line);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
 }
 
 .booking-price {

@@ -16,6 +16,10 @@ export default defineConfig({
         target: process.env.VITE_PROXY_BACKEND || 'http://localhost:8888',
         changeOrigin: true,
       },
+      '/uploads': {
+        target: process.env.VITE_PROXY_BACKEND || 'http://localhost:8888',
+        changeOrigin: true,
+      },
     },
   },
   build: {

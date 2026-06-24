@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { ArrowDown, User } from '@element-plus/icons-vue';
+import {
+  ArrowDown, User, HomeFilled, House, Tickets, StarFilled
+} from '@element-plus/icons-vue';
 import { clearAuthState, getCurrentUser } from '@/utils/auth';
 
 const route = useRoute();
@@ -11,10 +13,10 @@ const currentUser = getCurrentUser();
 const isAdmin = computed(() => currentUser?.role === 'ADMIN');
 
 const navItems = [
-  { label: '首页', path: '/portal/home' },
-  { label: '房源列表', path: '/portal/houses' },
-  { label: '我的订单', path: '/portal/orders' },
-  { label: '我的收藏', path: '/portal/favorites' },
+  { label: '首页', path: '/portal/home', icon: HomeFilled },
+  { label: '房源列表', path: '/portal/houses', icon: House },
+  { label: '我的订单', path: '/portal/orders', icon: Tickets },
+  { label: '我的收藏', path: '/portal/favorites', icon: StarFilled },
 ];
 
 const activeMenu = computed(() => {
@@ -47,10 +49,11 @@ function logout() {
             <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
               <rect width="40" height="40" rx="10" fill="url(#portalGrad)" />
               <path d="M12 28V14l8 7 8-7v14" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+              <rect x="18" y="20" width="4" height="8" rx="1" fill="var(--c-coral)" opacity="0.9" />
               <defs>
                 <linearGradient id="portalGrad" x1="0" y1="0" x2="40" y2="40">
                   <stop stop-color="#0ea5e9" />
-                  <stop offset="1" stop-color="#2563eb" />
+                  <stop offset="1" stop-color="#0284c7" />
                 </linearGradient>
               </defs>
             </svg>
@@ -114,7 +117,7 @@ function logout() {
                 <defs>
                   <linearGradient id="footerGrad" x1="0" y1="0" x2="32" y2="32">
                     <stop stop-color="#0ea5e9" />
-                    <stop offset="1" stop-color="#2563eb" />
+                    <stop offset="1" stop-color="#0284c7" />
                   </linearGradient>
                 </defs>
               </svg>
@@ -152,6 +155,7 @@ function logout() {
         :class="{ active: activeMenu === item.path }"
         @click="router.push(item.path)"
       >
+        <el-icon><component :is="item.icon" /></el-icon>
         <span>{{ item.label }}</span>
       </div>
       <div
@@ -159,6 +163,7 @@ function logout() {
         :class="{ active: route.path === '/portal/profile' }"
         @click="currentUser ? router.push('/portal/profile') : router.push('/login')"
       >
+        <el-icon><User /></el-icon>
         <span>{{ currentUser ? '我的' : '登录' }}</span>
       </div>
     </div>
@@ -171,8 +176,8 @@ function logout() {
   min-height: 100vh;
   flex-direction: column;
   background:
-    radial-gradient(ellipse 80% 60% at 10% 0%, rgb(14 165 233 / 4%), transparent),
-    radial-gradient(ellipse 60% 50% at 90% 100%, rgb(37 99 235 / 3%), transparent),
+    radial-gradient(ellipse 80% 60% at 10% 0%, rgb(2 132 199 / 4%), transparent),
+    radial-gradient(ellipse 60% 50% at 90% 100%, rgb(234 115 86 / 3%), transparent),
     var(--c-bg);
   padding-bottom: 70px;
 }
@@ -186,6 +191,7 @@ function logout() {
   border-bottom: 1px solid var(--c-line);
   backdrop-filter: blur(20px) saturate(1.8);
   -webkit-backdrop-filter: blur(20px) saturate(1.8);
+  box-shadow: 0 1px 3px rgb(26 35 50 / 4%);
 }
 
 .header-inner {
@@ -206,20 +212,12 @@ function logout() {
   transition: opacity var(--transition-fast);
   flex-shrink: 0;
 }
+.brand:hover { opacity: 0.85; }
 
-.brand:hover {
-  opacity: 0.85;
-}
-
-.brand-mark {
-  width: 36px;
-  height: 36px;
-}
-
+.brand-mark { width: 36px; height: 36px; }
 .brand-mark svg {
-  width: 100%;
-  height: 100%;
-  filter: drop-shadow(0 2px 4px rgb(14 165 233 / 30%));
+  width: 100%; height: 100%;
+  filter: drop-shadow(0 2px 4px rgb(2 132 199 / 30%));
 }
 
 .brand-text {
@@ -238,18 +236,11 @@ function logout() {
   justify-content: center;
   background: transparent;
 }
-
 .portal-menu :deep(.el-menu-item) {
   height: 48px;
   font-size: 15px;
   font-weight: 500;
   color: var(--c-body);
-  border-bottom-width: 2.5px;
-}
-
-.portal-menu :deep(.el-menu-item:hover) {
-  color: var(--c-primary);
-  background: transparent;
 }
 
 .header-actions {
@@ -268,13 +259,10 @@ function logout() {
   border-radius: var(--radius-md);
   transition: background var(--transition-fast);
 }
-
-.user-badge:hover {
-  background: var(--c-line-light);
-}
+.user-badge:hover { background: var(--c-line-light); }
 
 .user-avatar {
-  background: linear-gradient(135deg, var(--c-primary), var(--c-primary-dark));
+  background: linear-gradient(135deg, #0ea5e9, var(--c-primary-dark));
   color: #fff;
 }
 
@@ -288,45 +276,23 @@ function logout() {
   white-space: nowrap;
 }
 
-.user-arrow {
-  font-size: 12px;
-  color: var(--c-muted);
-}
+.user-arrow { font-size: 12px; color: var(--c-muted); }
 
-.admin-menu-item {
-  color: var(--c-primary);
-  font-weight: 600;
-}
+.admin-menu-item { color: var(--c-primary); font-weight: 600; }
 
-.register-btn {
-  font-weight: 600;
-  border-radius: var(--radius-md);
-  padding: 0 18px;
-}
-
-.login-btn {
-  font-weight: 600;
-  border-radius: var(--radius-md);
-  padding: 0 20px;
-}
+.register-btn { font-weight: 600; border-radius: var(--radius-md); padding: 0 18px; }
+.login-btn { font-weight: 600; border-radius: var(--radius-md); padding: 0 20px; }
 
 /* Main */
-.portal-main {
-  flex: 1;
-  min-width: 0;
-}
+.portal-main { flex: 1; min-width: 0; }
 
 /* Footer */
 .portal-footer {
   padding: 0;
-  background: #0f172a;
+  background: linear-gradient(180deg, #0f1a2b 0%, #0f172a 100%);
   color: #94a3b8;
 }
-
-.footer-inner {
-  max-width: 1280px;
-  margin: 0 auto;
-}
+.footer-inner { max-width: 1280px; margin: 0 auto; }
 
 .footer-top {
   display: flex;
@@ -334,97 +300,58 @@ function logout() {
   gap: 40px;
   padding: 40px 28px 32px;
 }
-
-.footer-brand {
-  max-width: 360px;
-}
+.footer-brand { max-width: 360px; }
 
 .footer-logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 12px;
+  display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
 }
-
-.footer-logo svg {
-  width: 28px;
-  height: 28px;
-}
-
-.footer-logo span {
-  font-size: 18px;
-  font-weight: 700;
-  color: #f1f5f9;
-}
+.footer-logo svg { width: 28px; height: 28px; }
+.footer-logo span { font-size: 18px; font-weight: 700; color: #f1f5f9; }
 
 .footer-desc {
-  font-size: 14px;
-  line-height: 1.7;
-  color: #64748b;
-  margin: 0;
+  font-size: 14px; line-height: 1.7; color: #64748b; margin: 0;
 }
 
-.footer-links {
-  display: flex;
-  gap: 60px;
-}
+.footer-links { display: flex; gap: 60px; }
 
 .footer-col h4 {
   margin: 0 0 16px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #e2e8f0;
+  font-size: 14px; font-weight: 600; color: #e2e8f0;
 }
-
 .footer-col a {
-  display: block;
-  margin-bottom: 10px;
-  font-size: 14px;
-  color: #64748b;
-  text-decoration: none;
-  cursor: pointer;
+  display: block; margin-bottom: 10px;
+  font-size: 14px; color: #64748b;
+  text-decoration: none; cursor: pointer;
   transition: color var(--transition-fast);
 }
-
-.footer-col a:hover {
-  color: #0ea5e9;
-}
+.footer-col a:hover { color: var(--c-coral-light); }
 
 .footer-bottom {
   padding: 18px 28px;
   border-top: 1px solid rgb(255 255 255 / 6%);
-  text-align: center;
-  font-size: 13px;
-  color: #475569;
+  text-align: center; font-size: 13px; color: #475569;
 }
 
-/* Page transition */
+/* Page transitions */
 .page-enter-active,
 .page-leave-active {
-  transition: all 0.25s ease;
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
-
-.page-enter-from {
-  opacity: 0;
-  transform: translateY(12px);
-}
-
-.page-leave-to {
-  opacity: 0;
-  transform: translateY(-8px);
-}
+.page-enter-from { opacity: 0; transform: translateY(10px); }
+.page-leave-to   { opacity: 0; transform: translateY(-6px); }
 
 /* Mobile tabs */
 .mobile-tabs {
   display: none;
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 40;
-  background: var(--c-surface);
-  border-top: 1px solid var(--c-line);
-  padding: 6px 0 env(safe-area-inset-bottom);
+  bottom: 0; left: 0; right: 0; z-index: 40;
+  height: 56px;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+  background: rgb(255 255 255 / 95%);
+  backdrop-filter: blur(16px) saturate(1.8);
+  -webkit-backdrop-filter: blur(16px) saturate(1.8);
+  border-top: 1px solid rgb(229 232 236 / 80%);
+  box-shadow: 0 -2px 12px rgb(26 35 50 / 6%);
 }
 
 .mobile-tab {
@@ -433,47 +360,27 @@ function logout() {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
-  padding: 6px 0;
-  font-size: 11px;
+  gap: 1px;
+  padding: 4px 0;
+  font-size: 10px;
   color: var(--c-muted);
   cursor: pointer;
   transition: color var(--transition-fast);
+  height: 56px;
 }
-
+.mobile-tab .el-icon { font-size: 20px; margin-bottom: 1px; }
 .mobile-tab.active {
   color: var(--c-primary);
   font-weight: 600;
 }
 
 @media (max-width: 768px) {
-  .header-inner {
-    padding: 10px 16px;
-    min-height: 52px;
-  }
-
-  .brand-text {
-    font-size: 17px;
-  }
-
-  .portal-menu {
-    display: none;
-  }
-
-  .portal-layout {
-    padding-bottom: 70px;
-  }
-
-  .mobile-tabs {
-    display: flex;
-  }
-
-  .portal-footer {
-    display: none;
-  }
-
-  .register-btn {
-    display: none;
-  }
+  .header-inner { padding: 10px 16px; min-height: 52px; }
+  .brand-text { font-size: 17px; }
+  .portal-menu { display: none; }
+  .portal-layout { padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px)); }
+  .mobile-tabs { display: flex; }
+  .portal-footer { display: none; }
+  .register-btn { display: none; }
 }
 </style>

@@ -1,0 +1,28 @@
+<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#f0f9ff"/><stop offset="100%" stop-color="#f7f9fc"/></linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#bg3)"/>
+  <!-- 城市建筑背景 -->
+  <rect x="20" y="210" width="40" height="90" rx="3" fill="#e5e8ec" opacity="0.6"/>
+  <rect x="70" y="180" width="35" height="120" rx="3" fill="#e2e8f0" opacity="0.5"/>
+  <rect x="310" y="190" width="35" height="110" rx="3" fill="#e5e8ec" opacity="0.6"/>
+  <rect x="355" y="220" width="40" height="80" rx="3" fill="#e2e8f0" opacity="0.5"/>
+  <!-- 房屋主体 -->
+  <rect x="120" y="145" width="160" height="95" rx="8" fill="#fff" stroke="#e5e8ec" stroke-width="1"/>
+  <!-- 屋顶露台 -->
+  <rect x="130" y="138" width="140" height="10" rx="3" fill="#0284c7" opacity="0.15"/>
+  <line x1="170" y1="138" x2="170" y2="148" stroke="#0284c7" stroke-width="1.5" opacity="0.4"/>
+  <line x1="230" y1="138" x2="230" y2="148" stroke="#0284c7" stroke-width="1.5" opacity="0.4"/>
+  <!-- 窗户 -->
+  <rect x="138" y="160" width="30" height="24" rx="3" fill="#f0f9ff" stroke="#bae6fd" stroke-width="1"/>
+  <rect x="183" y="160" width="34" height="24" rx="3" fill="#f0f9ff" stroke="#bae6fd" stroke-width="1"/>
+  <rect x="232" y="160" width="30" height="24" rx="3" fill="#f0f9ff" stroke="#bae6fd" stroke-width="1"/>
+  <!-- 状态条 -->
+  <rect x="233" y="220" width="30" height="14" rx="2" fill="#fef3ee"/>
+  <rect x="233" y="220" width="16" height="14" rx="2" fill="#ea7356"/>
+  <!-- 门 -->
+  <rect x="178" y="200" width="44" height="40" rx="4" fill="var(--c-primary)"/>
+  <circle cx="214" cy="222" r="3" fill="#fff"/>
+  <text x="200" y="285" text-anchor="middle" fill="#0284c7" font-family="sans-serif" font-size="13" font-weight="600">🏢 城市公寓</text>
+</svg>

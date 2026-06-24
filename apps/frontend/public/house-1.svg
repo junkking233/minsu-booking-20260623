@@ -1,0 +1,26 @@
+<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e0f2fe"/><stop offset="100%" stop-color="#f0f9ff"/></linearGradient>
+    <linearGradient id="roof" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#f5a78a"/><stop offset="100%" stop-color="#ea7356"/></linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#bg)"/>
+  <circle cx="320" cy="50" r="28" fill="#fef3ee" opacity="0.9"/>
+  <circle cx="320" cy="50" r="20" fill="#fce7c8"/>
+  <ellipse cx="200" cy="280" rx="240" ry="60" fill="#d1fae5" opacity="0.5"/>
+  <ellipse cx="80" cy="300" rx="160" ry="50" fill="#a7f3d0" opacity="0.4"/>
+  <path d="M0 215 Q100 205 200 212 Q300 220 400 215 L400 300 L0 300Z" fill="#bae6fd" opacity="0.4"/>
+  <rect x="120" y="155" width="160" height="85" rx="8" fill="#fff" stroke="#e5e8ec" stroke-width="1"/>
+  <polygon points="108,160 200,100 292,160" fill="url(#roof)"/>
+  <rect x="178" y="195" width="44" height="45" rx="4" fill="#0284c7"/>
+  <circle cx="214" cy="220" r="3" fill="#fff"/>
+  <rect x="138" y="175" width="24" height="24" rx="4" fill="#e0f2fe" stroke="#bae6fd" stroke-width="1"/>
+  <rect x="238" y="175" width="24" height="24" rx="4" fill="#e0f2fe" stroke="#bae6fd" stroke-width="1"/>
+  <line x1="90" y1="145" x2="90" y2="245" stroke="#d4a574" stroke-width="3.5" stroke-linecap="round"/>
+  <circle cx="90" cy="140" r="22" fill="#6b9b7f" opacity="0.8"/>
+  <circle cx="80" cy="150" r="20" fill="#8fbc9a" opacity="0.7"/>
+  <circle cx="100" cy="148" r="18" fill="#7aab8a" opacity="0.7"/>
+  <ellipse cx="170" cy="55" rx="38" ry="14" fill="#fff"/>
+  <ellipse cx="200" cy="48" rx="28" ry="11" fill="#fff"/>
+  <ellipse cx="145" cy="50" rx="22" ry="10" fill="#fff"/>
+  <text x="200" y="285" text-anchor="middle" fill="#0284c7" font-family="sans-serif" font-size="13" font-weight="600">🌴 海边小屋</text>
+</svg>

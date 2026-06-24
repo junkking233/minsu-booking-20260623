@@ -2,7 +2,7 @@
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
-import { User } from '@element-plus/icons-vue';
+import { Lock, User } from '@element-plus/icons-vue';
 import { authApi } from '@/api/authApi';
 import { orderApi } from '@/api/orderApi';
 import { favoriteApi } from '@/api/favoriteApi';
@@ -160,26 +160,32 @@ onMounted(() => {
           </el-card>
 
           <!-- 修改密码 -->
-          <el-card class="password-card" v-if="showPasswordForm">
-            <h3>修改密码</h3>
-            <el-form :model="passwordForm" label-width="80px">
-              <el-form-item label="原密码">
-                <el-input v-model="passwordForm.oldPassword" type="password" show-password />
-              </el-form-item>
-              <el-form-item label="新密码">
-                <el-input v-model="passwordForm.newPassword" type="password" show-password />
-              </el-form-item>
-              <el-form-item label="确认密码">
-                <el-input v-model="passwordForm.confirmPassword" type="password" show-password />
-              </el-form-item>
-              <el-form-item>
-                <el-button type="primary" :loading="changingPassword" @click="changePassword">确认修改</el-button>
-                <el-button @click="showPasswordForm = false">取消</el-button>
-              </el-form-item>
-            </el-form>
-          </el-card>
+          <div class="password-section">
+            <el-card class="password-card" v-if="showPasswordForm">
+              <h3><el-icon><Lock /></el-icon> 修改密码</h3>
+              <el-form :model="passwordForm" label-width="80px" class="password-form">
+                <el-form-item label="原密码">
+                  <el-input v-model="passwordForm.oldPassword" type="password" show-password placeholder="请输入原密码" />
+                </el-form-item>
+                <el-form-item label="新密码">
+                  <el-input v-model="passwordForm.newPassword" type="password" show-password placeholder="请输入新密码（6-20位）" />
+                </el-form-item>
+                <el-form-item label="确认密码">
+                  <el-input v-model="passwordForm.confirmPassword" type="password" show-password placeholder="请再次输入新密码" />
+                </el-form-item>
+                <el-form-item>
+                  <el-button type="primary" :loading="changingPassword" @click="changePassword">确认修改</el-button>
+                  <el-button @click="showPasswordForm = false">取消</el-button>
+                </el-form-item>
+              </el-form>
+            </el-card>
 
-          <el-button v-else type="warning" @click="showPasswordForm = true">修改密码</el-button>
+            <div v-else class="password-toggle" @click="showPasswordForm = true">
+              <span class="pwd-icon"><el-icon :size="18"><Lock /></el-icon></span>
+              <span>修改密码</span>
+              <span class="pwd-hint">修改您的登录密码</span>
+            </div>
+          </div>
         </div>
 
         <!-- 右侧统计 -->
@@ -217,7 +223,7 @@ onMounted(() => {
 
 <style scoped>
 .profile-page {
-  max-width: 800px;
+  max-width: 1000px;
   margin: 0 auto;
   padding: 24px 20px;
 }
@@ -236,12 +242,14 @@ onMounted(() => {
 }
 
 .profile-header {
+  position: relative;
   display: flex;
-  align-items: center;
-  gap: 18px;
-  margin-bottom: 24px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid var(--c-line);
+  align-items: flex-end;
+  gap: 20px;
+  margin: -20px -20px 20px;
+  padding: 72px 20px 20px;
+  background: linear-gradient(135deg, var(--c-primary-bg) 0%, var(--c-bg-warm) 100%);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
 }
 
 .profile-avatar {
@@ -285,12 +293,39 @@ onMounted(() => {
   border-radius: var(--radius-md);
 }
 
-.password-card {
-  margin-top: 16px;
-}
-
+.password-section { margin-top: 16px; }
 .password-card h3 {
-  margin: 0 0 16px;
+  margin: 0 0 16px; display: flex; align-items: center; gap: 8px;
+  color: var(--c-ink);
+}
+.password-form .el-input { width: 100%; }
+
+.password-toggle {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 16px;
+  background: var(--c-surface);
+  border: 1px solid rgb(229 232 236 / 70%);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-sm);
+}
+.password-toggle:hover {
+  border-color: var(--c-primary-light);
+  box-shadow: var(--shadow-md);
+}
+.pwd-icon {
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--c-primary-bg);
+  border-radius: var(--radius-md);
+  color: var(--c-primary);
+}
+.password-toggle > span:nth-child(2) {
+  font-size: 14px; font-weight: 600; color: var(--c-ink);
+}
+.pwd-hint {
+  margin-left: auto; font-size: 12px; color: var(--c-muted-light);
 }
 
 .stats-card {
@@ -313,12 +348,13 @@ onMounted(() => {
   padding: 16px 12px;
   background: var(--c-line-light);
   border-radius: var(--radius-md);
-  transition: all var(--transition-fast);
+  transition: all var(--transition-base);
 }
-
-.stat-item:hover {
-  background: var(--c-primary-bg);
-}
+.stat-item:nth-child(1) { background: var(--c-primary-bg); }
+.stat-item:nth-child(2) { background: var(--c-coral-bg); }
+.stat-item:nth-child(3) { background: var(--c-sage-bg); }
+.stat-item:nth-child(4) { background: var(--c-amber-bg); }
+.stat-item:hover { transform: translateY(-2px); box-shadow: var(--shadow-sm); }
 
 .stat-value {
   font-size: 28px;

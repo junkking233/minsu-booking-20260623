@@ -1,231 +1,110 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { ElMessage, ElMessageBox } from 'element-plus';
-import { Star } from '@element-plus/icons-vue';
+import { ElMessage } from 'element-plus';
 import { favoriteApi } from '@/api/favoriteApi';
+import HouseCard from '@/components/common/HouseCard.vue';
+import EmptyState from '@/components/common/EmptyState.vue';
 
 const router = useRouter();
 
 interface FavoriteItem {
-  id: number;
-  houseId: number;
-  houseName: string;
-  houseCoverImage: string;
-  houseCity: string;
-  housePrice: number;
-  houseRating: number;
-  houseStatus: string;
-  createTime: string;
+  id: number; houseId: number; houseName: string;
+  houseCoverImage: string; houseCity: string; housePrice: number;
+  houseRating: number; houseStatus: string; createTime: string;
 }
 
 const favorites = ref<FavoriteItem[]>([]);
-const total = ref(0);
 const loading = ref(false);
-const page = ref(1);
-const pageSize = 20;
 
 async function loadFavorites() {
   loading.value = true;
-  try {
-    const data = await favoriteApi.myList() as FavoriteItem[];
-    favorites.value = data || [];
-    total.value = favorites.value.length;
-  } catch (e) {
-    ElMessage.error('加载收藏失败');
-  } finally {
-    loading.value = false;
-  }
+  try { favorites.value = (await favoriteApi.myList()) as FavoriteItem[] || []; }
+  catch { ElMessage.error('加载收藏失败'); }
+  finally { loading.value = false; }
 }
 
 async function handleRemove(fav: FavoriteItem) {
   try {
-    await ElMessageBox.confirm('确定取消收藏该房源？', '提示', { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning' });
     await favoriteApi.remove(fav.houseId);
     ElMessage.success('已取消收藏');
     loadFavorites();
   } catch (e: any) {
-    if (e !== 'cancel') ElMessage.error(e instanceof Error ? e.message : '操作失败');
+    ElMessage.error(e instanceof Error ? e.message : '操作失败');
   }
 }
 
-function goDetail(houseId: number) {
-  router.push(`/portal/houses/${houseId}`);
-}
-
-function goBooking(houseId: number) {
-  router.push(`/portal/booking/${houseId}`);
-}
-
-function onPageChange(p: number) {
-  page.value = p;
-  loadFavorites();
-}
+function goDetail(id: number | string) { router.push(`/portal/houses/${id}`); }
+function goBooking(house: any) { router.push(`/portal/booking/${house.id || house.houseId}`); }
 
 onMounted(loadFavorites);
 </script>
 
 <template>
   <div class="favorites-page">
-    <div class="page-inner">
+    <div class="page-header">
       <h1 class="page-title">我的收藏</h1>
+      <span class="fav-count" v-if="favorites.length">共 {{ favorites.length }} 套</span>
+    </div>
 
-      <div v-loading="loading">
-        <div class="fav-grid" v-if="favorites.length > 0">
-          <el-card
-            v-for="fav in favorites"
-            :key="fav.id"
-            class="fav-card"
-            shadow="hover"
-          >
-            <img
-              :src="fav.houseCoverImage || '/placeholder.svg'"
-              class="fav-img"
-              @click="goDetail(fav.houseId)"
-            />
-            <div class="fav-body">
-              <h4 class="fav-name" @click="goDetail(fav.houseId)">{{ fav.houseName }}</h4>
-              <p class="fav-city">{{ fav.houseCity }}</p>
-              <div class="fav-meta">
-                <span class="fav-rating"><el-icon><Star /></el-icon>{{ fav.houseRating }}</span>
-                <span class="fav-price"><strong>&yen;{{ fav.housePrice }}</strong>/晚</span>
-              </div>
-              <div class="fav-tags">
-                <el-tag v-if="fav.houseStatus === 'OFF'" type="danger" size="small">已下架</el-tag>
-              </div>
-              <div class="fav-actions">
-                <el-button type="danger" size="small" plain @click="handleRemove(fav)">取消收藏</el-button>
-                <el-button type="primary" size="small" :disabled="fav.houseStatus === 'OFF'" @click="goBooking(fav.houseId)">
-                  预约
-                </el-button>
-              </div>
-            </div>
-          </el-card>
-        </div>
-
-        <el-empty v-if="!loading && favorites.length === 0" description="暂无收藏">
-          <el-button type="primary" @click="router.push('/portal/houses')">去逛逛</el-button>
-        </el-empty>
-
-        <div class="pagination-bar" v-if="total > 0">
-          <el-pagination
-            v-model:current-page="page"
-            :page-size="pageSize"
-            :total="total"
-            layout="total, prev, pager, next"
-            @current-change="onPageChange"
+    <div v-loading="loading">
+      <div class="fav-grid" v-if="favorites.length > 0">
+        <div class="fav-card-wrapper" v-for="fav in favorites" :key="fav.id">
+          <div class="fav-remove" @click="handleRemove(fav)" title="取消收藏">
+            <el-icon :size="14"><el-icon><svg viewBox="0 0 24 24" width="14" height="14"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></el-icon></el-icon>
+          </div>
+          <HouseCard
+            size="small"
+            :house="{
+              id: fav.houseId, name: fav.houseName, city: fav.houseCity,
+              price: fav.housePrice, rating: fav.houseRating,
+              coverImage: fav.houseCoverImage,
+              status: fav.houseStatus === 'OFF' ? 'UNAVAILABLE' : undefined,
+            }"
+            :favorited="true"
+            :show-actions="true"
+            @click="goDetail"
+            @book="goBooking"
+            @toggle-favorite="(h: any) => handleRemove(fav)"
           />
         </div>
       </div>
+
+      <EmptyState v-else-if="!loading" type="favorites" :show-action="true" @action="router.push('/portal/houses')">
+        <template #action-text>去挑选民宿</template>
+      </EmptyState>
     </div>
   </div>
 </template>
 
 <style scoped>
-.favorites-page {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 24px 20px;
-}
+.favorites-page { max-width: 1000px; margin: 0 auto; padding: 24px 20px; }
 
-.page-title {
-  margin: 0 0 24px;
-  font-size: 24px;
-  font-weight: 800;
-}
+.page-header { display: flex; align-items: baseline; gap: 12px; margin-bottom: 24px; }
+.page-title { margin: 0; font-size: 26px; font-weight: 800; letter-spacing: -0.5px; color: var(--c-ink); }
+.fav-count { font-size: 14px; color: var(--c-muted); }
 
 .fav-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;
 }
-
-.fav-card {
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  transition: all var(--transition-base);
-  background: var(--c-surface);
-  border: 1px solid var(--c-line);
-}
-
-.fav-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lg);
-}
-
-.fav-card:hover .fav-img {
-  transform: scale(1.05);
-}
-
-.fav-img {
-  width: 100%;
-  height: 180px;
-  object-fit: cover;
+.fav-card-wrapper { position: relative; }
+.fav-remove {
+  position: absolute; top: 10px; right: 10px; z-index: 10;
+  width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgb(255 255 255 / 85%);
+  backdrop-filter: blur(4px);
+  border-radius: 50%;
   cursor: pointer;
-  transition: transform var(--transition-slow);
-}
-
-.fav-body {
-  padding: 14px;
-}
-
-.fav-name {
-  margin: 0 0 4px;
-  font-size: 15px;
-  cursor: pointer;
-}
-
-.fav-name:hover {
-  color: var(--c-primary);
-}
-
-.fav-city {
-  margin: 0 0 10px;
-  font-size: 13px;
   color: var(--c-muted);
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
 }
-
-.fav-meta {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.fav-rating {
-  display: flex;
-  align-items: center;
-  gap: 3px;
-  color: var(--c-amber);
-  font-weight: 600;
-  font-size: 13px;
-}
-
-.fav-price strong {
-  font-size: 17px;
-  color: var(--c-red);
-}
-
-.fav-price {
-  font-size: 12px;
-  color: var(--c-muted);
-}
-
-.fav-tags {
-  margin-bottom: 10px;
-}
-
-.fav-actions {
-  display: flex;
-  gap: 8px;
-  justify-content: flex-end;
-  padding-top: 10px;
-  border-top: 1px solid var(--c-line);
-}
+.fav-remove:hover { background: var(--c-red-bg); color: var(--c-red); }
 
 @media (max-width: 768px) {
-  .fav-grid {
-    grid-template-columns: 1fr;
-  }
+  .fav-grid { grid-template-columns: 1fr; }
 }
 </style>

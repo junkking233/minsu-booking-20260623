@@ -1,5 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="400" height="260" viewBox="0 0 400 260">
-  <rect fill="#e2e8f0" width="400" height="260"/>
-  <text fill="#94a3b8" font-family="sans-serif" font-size="16" x="200" y="125" text-anchor="middle">暂无图片</text>
-  <text fill="#94a3b8" font-family="sans-serif" font-size="12" x="200" y="148" text-anchor="middle">🏠</text>
+<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="pg" x1="0" y1="0" x2="100%" y2="100%"><stop offset="0%" stop-color="#f3f5f8"/><stop offset="100%" stop-color="#e5e8ec"/></linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#pg)"/>
+  <g transform="translate(200,140)" fill="none" stroke="#a8b3c0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M-50,30 V-10 L0,-40 L50,-10 V30 Z"/>
+    <rect x="-18" y="8" width="36" height="22" rx="3"/>
+    <line x1="-50" y1="30" x2="50" y2="30"/>
+  </g>
+  <text x="200" y="200" text-anchor="middle" fill="#7a8899" font-family="sans-serif" font-size="14" font-weight="500">暂无图片</text>
 </svg>

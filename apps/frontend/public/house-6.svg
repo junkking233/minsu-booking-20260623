@@ -1,0 +1,32 @@
+<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="b6" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#f0f9ff"/><stop offset="100%" stop-color="#faf7f2"/></linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#b6)"/>
+  <!-- 湖 -->
+  <ellipse cx="200" cy="250" rx="200" ry="60" fill="#bae6fd" opacity="0.5"/>
+  <ellipse cx="200" cy="250" rx="150" ry="40" fill="#7dd3fc" opacity="0.3"/>
+  <!-- 远山 -->
+  <ellipse cx="350" cy="180" rx="100" ry="70" fill="#d1fae5" opacity="0.5"/>
+  <!-- 木屋 -->
+  <rect x="130" y="155" width="140" height="80" rx="4" fill="#f5e6d3" stroke="#d4a574" stroke-width="1.5"/>
+  <!-- 木头纹理 -->
+  <line x1="130" y1="175" x2="270" y2="175" stroke="#ede0cb" stroke-width="1"/>
+  <line x1="130" y1="195" x2="270" y2="195" stroke="#ede0cb" stroke-width="1"/>
+  <line x1="130" y1="215" x2="270" y2="215" stroke="#ede0cb" stroke-width="1"/>
+  <polygon points="115,160 200,100 285,160" fill="#6b9b7f"/>
+  <polygon points="120,157 200,103 280,157" fill="#8fbc9a"/>
+  <!-- 门 -->
+  <rect x="178" y="195" width="44" height="40" rx="4" fill="#0284c7"/>
+  <circle cx="214" cy="218" r="3" fill="#fff"/>
+  <!-- 窗户 -->
+  <rect x="138" y="175" width="24" height="22" rx="3" fill="#e0f2fe" stroke="#bae6fd" stroke-width="1"/>
+  <rect x="238" y="175" width="24" height="22" rx="3" fill="#e0f2fe" stroke="#bae6fd" stroke-width="1"/>
+  <!-- 小木桩 -->
+  <rect x="90" y="220" width="6" height="18" rx="2" fill="#d4a574"/>
+  <rect x="304" y="220" width="6" height="18" rx="2" fill="#d4a574"/>
+  <!-- 灯笼 -->
+  <circle cx="270" cy="120" r="6" fill="#fce7c8"/>
+  <line x1="270" y1="126" x2="270" y2="140" stroke="#d4a574" stroke-width="1.5"/>
+  <text x="200" y="285" text-anchor="middle" fill="#3d6b4e" font-family="sans-serif" font-size="13" font-weight="600">🏚 山间木屋</text>
+</svg>

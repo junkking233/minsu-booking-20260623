@@ -1,0 +1,25 @@
+<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#eef5ef"/><stop offset="100%" stop-color="#f0fdf4"/></linearGradient>
+    <linearGradient id="roof" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#6b9b7f"/><stop offset="100%" stop-color="#3d6b4e"/></linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#bg)"/>
+  <ellipse cx="200" cy="290" rx="240" ry="70" fill="#d1fae5" opacity="0.6"/>
+  <ellipse cx="100" cy="300" rx="160" ry="50" fill="#a7f3d0" opacity="0.5"/>
+  <path d="M50 280 Q150 240 250 260 Q320 270 380 250" stroke="#86efac" stroke-width="3" fill="none" opacity="0.5"/>
+  <!-- 山峦 -->
+  <ellipse cx="350" cy="160" rx="100" ry="80" fill="#d1fae5" opacity="0.5"/>
+  <ellipse cx="350" cy="160" rx="60" ry="60" fill="#bae6fd" opacity="0.4"/>
+  <!-- 房屋 -->
+  <rect x="130" y="150" width="140" height="90" rx="6" fill="#fff" stroke="#e5e8ec" stroke-width="1"/>
+  <polygon points="115,155 200,95 285,155" fill="url(#roof)"/>
+  <rect x="178" y="195" width="44" height="45" rx="4" fill="#0284c7"/>
+  <rect x="135" y="175" width="26" height="26" rx="4" fill="#e0f2fe" stroke="#bae6fd" stroke-width="1"/>
+  <rect x="239" y="175" width="26" height="26" rx="4" fill="#e0f2fe" stroke="#bae6fd" stroke-width="1"/>
+  <!-- 松树 -->
+  <polygon points="80,240 90,200 100,240" fill="#6b9b7f"/>
+  <polygon points="75,220 90,185 105,220" fill="#8fbc9a"/>
+  <polygon points="310,230 322,185 334,230" fill="#6b9b7f"/>
+  <polygon points="305,210 322,170 339,210" fill="#8fbc9a"/>
+  <text x="200" y="285" text-anchor="middle" fill="#3d6b4e" font-family="sans-serif" font-size="13" font-weight="600">🏔 山景别墅</text>
+</svg>

@@ -2,6 +2,7 @@
 import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
+import { Lock } from '@element-plus/icons-vue';
 import { houseApi } from '@/api/houseApi';
 import { orderApi } from '@/api/orderApi';
 
@@ -208,13 +209,18 @@ onMounted(loadHouse);
             <el-button
               type="primary"
               size="large"
-              class="submit-btn"
+              class="submit-btn btn-coral"
               :loading="submitting"
               :disabled="!availability || !availability.available"
               @click="submitOrder"
             >
-              提交订单
+              <el-icon><Lock /></el-icon> 提交订单
             </el-button>
+
+            <div class="trust-strip">
+              <span class="trust-item">✓ 免费取消</span>
+              <span class="trust-item">✓ 安全支付</span>
+            </div>
           </el-card>
         </div>
       </div>
@@ -306,8 +312,8 @@ onMounted(loadHouse);
 }
 
 .price-total strong {
-  color: var(--c-red);
-  font-size: 20px;
+  color: var(--c-price);
+  font-size: 22px;
 }
 
 .discount {
@@ -335,8 +341,16 @@ onMounted(loadHouse);
   font-size: 16px;
   font-weight: 700;
   border-radius: var(--radius-md);
-  margin-top: 16px;
+  margin-top: 8px;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
 }
+
+.trust-strip {
+  display: flex; justify-content: center; gap: 20px;
+  margin-top: 14px; padding-top: 14px;
+  border-top: 1px solid var(--c-line-light);
+}
+.trust-item { font-size: 12px; color: var(--c-sage); font-weight: 600; }
 
 @media (max-width: 768px) {
   .booking-grid {
